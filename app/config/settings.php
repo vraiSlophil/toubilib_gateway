@@ -28,11 +28,11 @@ return [
     ],
 
     'db.praticien' => static function (): PDO {
-        $driver = $_ENV['prat.driver'];
-        $host = $_ENV['prat.host'];
-        $db = $_ENV['prat.database'];
-        $user = $_ENV['prat.username'];
-        $pass = $_ENV['prat.password'];
+        $driver = $_ENV['PRAT_DRIVER'];
+        $host = $_ENV['PRAT_HOST'];
+        $db = $_ENV['PRAT_DATABASE'];
+        $user = $_ENV['PRAT_USERNAME'];
+        $pass = $_ENV['PRAT_PASSWORD'];
         $charset = 'utf8mb4';
 
         $dsn = $driver === 'mysql'
@@ -47,11 +47,11 @@ return [
     },
 
     'db.rdv' => static function (): PDO {
-        $driver = $_ENV['rdv.driver'];
-        $host = $_ENV['rdv.host'];
-        $db = $_ENV['rdv.database'];
-        $user = $_ENV['rdv.username'];
-        $pass = $_ENV['rdv.password'];
+        $driver = $_ENV['RDV_DRIVER'];
+        $host = $_ENV['RDV_HOST'];
+        $db = $_ENV['RDV_DATABASE'];
+        $user = $_ENV['RDV_USERNAME'];
+        $pass = $_ENV['RDV_PASSWORD'];
         $charset = 'utf8mb4';
 
         $dsn = $driver === 'mysql'
@@ -66,11 +66,11 @@ return [
     },
 
     'db.patient' => static function (): PDO {
-        $driver = $_ENV['pat.driver'];
-        $host = $_ENV['pat.host'];
-        $db = $_ENV['pat.database'];
-        $user = $_ENV['pat.username'];
-        $pass = $_ENV['pat.password'];
+        $driver = $_ENV['PAT_DRIVER'];
+        $host = $_ENV['PAT_HOST'];
+        $db = $_ENV['PAT_DATABASE'];
+        $user = $_ENV['PAT_USERNAME'];
+        $pass = $_ENV['PAT_PASSWORD'];
         $charset = 'utf8mb4';
 
         $dsn = $driver === 'mysql'
@@ -85,11 +85,11 @@ return [
     },
 
     'db.authentification' => static function (): PDO {
-        $driver = $_ENV['auth.driver'];
-        $host = $_ENV['auth.host'];
-        $db = $_ENV['auth.database'];
-        $user = $_ENV['auth.username'];
-        $pass = $_ENV['auth.password'];
+        $driver = $_ENV['AUTH_DRIVER'];
+        $host = $_ENV['AUTH_HOST'];
+        $db = $_ENV['AUTH_DATABASE'];
+        $user = $_ENV['AUTH_USERNAME'];
+        $pass = $_ENV['AUTH_PASSWORD'];
         $charset = 'utf8mb4';
 
         $dsn = $driver === 'mysql'
