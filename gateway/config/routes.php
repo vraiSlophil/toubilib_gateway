@@ -7,11 +7,13 @@ use toubilib\gateway\Action\ProxyAction;
 
 return function (App $app): void {
     $app->group('/api', function (RouteCollectorProxyInterface $group) {
-        // Liste praticiens
-        $group->get('/praticiens', ProxyAction::class);
-        // Détail praticien
-        $group->get('/praticiens/{id}', ProxyAction::class);
-        // Rdvs d’un praticien
-        $group->get('/praticiens/{id}/rdvs', ProxyAction::class);
+        // Microservice RDV
+        $group->any('/rdvs[/{rest:.*}]', ProxyAction::class);
+
+        // Microservice praticiens
+        $group->any('/praticiens[/{rest:.*}]', ProxyAction::class);
+
+        // Reste (API monolitique)
+        $group->any('[/{rest:.*}]', ProxyAction::class);
     });
 };

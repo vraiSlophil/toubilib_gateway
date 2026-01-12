@@ -18,25 +18,34 @@ final class ProxyAction
 {
     private Client $client;
     private Client $praticiensClient;
+    private Client $rdvClient;
 
     public function __construct(ContainerInterface $container)
     {
         $this->client = $container->get('client.api');
         $this->praticiensClient = $container->get('client.praticiens');
+        $this->rdvClient = $container->get('client.rdv');
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $method = strtoupper($request->getMethod());
 
-        $path = ltrim($request->getUri()->getPath(), '/'); // ex: api/praticiens/123
+        $path = ltrim($request->getUri()->getPath(), '/');
 
-        // Choix du service en fonction du chemin (exercice 3)
-        $targetClient = str_starts_with($path, 'api/praticiens')
-            ? $this->praticiensClient
-            : $this->client;
+        // Choix du service en fonction du chemin (ex. 3 + ex. 4)
+        if (str_starts_with($path, 'api/praticiens')) {
+            $targetClient = $this->praticiensClient;
+            $isPraticiensRoute = true;
+        } elseif (str_starts_with($path, 'api/rdvs')) {
+            $targetClient = $this->rdvClient;
+            $isPraticiensRoute = false;
+        } else {
+            $targetClient = $this->client;
+            $isPraticiensRoute = false;
+        }
 
-        $upstreamPath = preg_replace('#^api/#', '', $path) ?? $path; // ex: praticiens/123
+        $upstreamPath = preg_replace('#^api/#', '', $path) ?? $path;
 
         if ($method === 'OPTIONS') {
             return $this->json($response->withStatus(204), null);
@@ -58,13 +67,14 @@ final class ProxyAction
 
         if ($status === 404) {
             return $this->json($response->withStatus(404), [
-                'error' => ['message' => 'Praticien not found'],
+                'error' => ['message' => 'Resource not found'],
             ]);
         }
 
-        if ($status >= 500 && $this->looksLikeInvalidUuidError($apiBody)) {
+        // Cas "UUID invalide" => uniquement pour les routes praticiens
+        if ($isPraticiensRoute && $status >= 500 && $this->looksLikeInvalidUuidError($apiBody)) {
             return $this->json($response->withStatus(404), [
-                'error' => ['message' => 'Praticien not found'],
+                'error' => ['message' => 'Resource not found'],
             ]);
         }
 

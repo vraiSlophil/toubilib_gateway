@@ -3,6 +3,25 @@ networks:
     driver: bridge
 
 services:
+
+  # service gateway
+  gateway.toubilib:
+    build:
+      context: build
+      dockerfile: 8.4-cli.Dockerfile
+    ports:
+      - "7080:80"
+    volumes:
+      - ./gateway:/var/php
+    working_dir: /var/php
+    networks:
+      - toubilib.net
+    depends_on:
+      - api.toubilib
+    env_file: ./app/config/.env
+    command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
+    
+  # service api.toubilib : api pour la prise de rdv
   api.toubilib:
     build:
       context: build
@@ -22,12 +41,13 @@ services:
     env_file: ./app/config/.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
-  api.praticiens.toubilib:
+  # service microservice praticiens
+  api.praticiens:
     build:
       context: build
       dockerfile: 8.4-cli.Dockerfile
     ports:
-      - '6180:80'
+      - '6081:80'
     volumes:
       - ./app-praticiens:/var/php
     working_dir: /var/php
@@ -38,19 +58,21 @@ services:
     env_file: ./app/config/.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
-  gateway.toubilib:
+  # service microservice rendez-vous
+  api.rdv:
     build:
       context: build
       dockerfile: 8.4-cli.Dockerfile
     ports:
-      - "7080:80"
+      - '6082:80'
     volumes:
-      - ./gateway:/var/php
+      - ./app-rdv:/var/php
     working_dir: /var/php
     networks:
       - toubilib.net
     depends_on:
-      - api.toubilib
+      - toubirdv.db
+      - api.praticiens
     env_file: ./app/config/.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
@@ -114,6 +136,9 @@ services:
     volumes:
       - ./sql:/var/sql
 
+  #
+  # service administration des bases sql
+  #
   adminer:
     image: adminer
     ports:

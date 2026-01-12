@@ -11,8 +11,9 @@ $builder = new ContainerBuilder();
 $builder->addDefinitions([
     // Client microservice praticiens
     'client.praticiens' => function (ContainerInterface $c) {
+        $baseUri = getenv('PRATICIENS_API_BASE_URI') ?: 'http://api.praticiens:80/api/';
         return new Client([
-            'base_uri' => 'http://api.praticiens.toubilib:80/api/',
+            'base_uri' => rtrim($baseUri, '/') . '/',
             'http_errors' => false,
             'timeout' => 10.0,
         ]);
@@ -20,8 +21,19 @@ $builder->addDefinitions([
 
     // Client API monolithique (autres routes)
     'client.api' => function (ContainerInterface $c) {
+        $baseUri = getenv('MONO_API_BASE_URI') ?: 'http://api.toubilib:80/api/';
         return new Client([
-            'base_uri' => 'http://api.toubilib:80/api/',
+            'base_uri' => rtrim($baseUri, '/') . '/',
+            'http_errors' => false,
+            'timeout' => 10.0,
+        ]);
+    },
+
+    // Client microservice RDV
+    'client.rdv' => function (ContainerInterface $c) {
+        $baseUri = getenv('RDV_API_BASE_URI') ?: 'http://api.rdv:80/api/';
+        return new Client([
+            'base_uri' => rtrim($baseUri, '/') . '/',
             'http_errors' => false,
             'timeout' => 10.0,
         ]);
