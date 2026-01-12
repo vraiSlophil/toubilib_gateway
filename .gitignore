@@ -16,8 +16,8 @@ cache.properties
 # Composer
 composer.phar
 composer.lock
-/app/vendor/
-/app/config/.env
+/*/vendor/
+/*/config/.env
 .env
 *.env
 .log
