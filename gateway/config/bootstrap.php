@@ -19,6 +19,16 @@ $builder->addDefinitions([
         ]);
     },
 
+    // Client microservice authentification
+    'client.auth' => function (ContainerInterface $c) {
+        $baseUri = getenv('AUTH_API_BASE_URI') ?: 'http://api.auth:80/api/';
+        return new Client([
+            'base_uri' => rtrim($baseUri, '/') . '/',
+            'http_errors' => false,
+            'timeout' => 10.0,
+        ]);
+    },
+
     // Client API monolithique (autres routes)
     'client.api' => function (ContainerInterface $c) {
         $baseUri = getenv('MONO_API_BASE_URI') ?: 'http://api.toubilib:80/api/';

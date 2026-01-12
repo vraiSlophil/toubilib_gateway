@@ -26,6 +26,11 @@ use toubilib\core\application\usecases\AuthzService;
 return function (App $app): App {
     $app->group('/api', function (RouteCollectorProxy $app) {
         $app->get('/', GetRootAction::class);
+
+        // NOTE TD2.2 Ex2:
+        // L'authentification est extraite dans le microservice `api.auth`.
+        // En pratique, ces routes doivent être consommées via la gateway (qui route /api/auth/* vers `api.auth`).
+        // Elles restent ici pour compatibilité / debug local.
         $app->post('/auth/signin', SigninAction::class);
         $app->post('/auth/signup', SignupAction::class);
         $app->post('/auth/refresh', RefreshAction::class);

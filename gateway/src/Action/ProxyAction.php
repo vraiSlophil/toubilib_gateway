@@ -19,12 +19,14 @@ final class ProxyAction
     private Client $client;
     private Client $praticiensClient;
     private Client $rdvClient;
+    private Client $authClient;
 
     public function __construct(ContainerInterface $container)
     {
         $this->client = $container->get('client.api');
         $this->praticiensClient = $container->get('client.praticiens');
         $this->rdvClient = $container->get('client.rdv');
+        $this->authClient = $container->get('client.auth');
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -33,7 +35,11 @@ final class ProxyAction
 
         $path = ltrim($request->getUri()->getPath(), '/');
 
-        if (str_starts_with($path, 'api/praticiens')) {
+        // Choix du service en fonction du chemin
+        if (str_starts_with($path, 'api/auth')) {
+            $targetClient = $this->authClient;
+            $isPraticiensRoute = false;
+        } elseif (str_starts_with($path, 'api/praticiens')) {
             $targetClient = $this->praticiensClient;
             $isPraticiensRoute = true;
         } elseif (str_starts_with($path, 'api/rdvs')) {
