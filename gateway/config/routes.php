@@ -7,6 +7,11 @@ use toubilib\gateway\Action\ProxyAction;
 
 return function (App $app): void {
     $app->group('/api', function (RouteCollectorProxyInterface $group) {
+        // Authentification
+        $group->post('/auth/signup', ProxyAction::class);
+        $group->post('/auth/signin', ProxyAction::class);
+        $group->post('/auth/refresh', ProxyAction::class);
+
         // Microservice RDV
         $group->any('/rdvs[/{rest:.*}]', ProxyAction::class);
 

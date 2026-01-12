@@ -33,7 +33,6 @@ final class ProxyAction
 
         $path = ltrim($request->getUri()->getPath(), '/');
 
-        // Choix du service en fonction du chemin (ex. 3 + ex. 4)
         if (str_starts_with($path, 'api/praticiens')) {
             $targetClient = $this->praticiensClient;
             $isPraticiensRoute = true;

@@ -5,6 +5,7 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use toubilib\api\actions\auth\SigninAction;
 use toubilib\api\actions\auth\SignupAction;
+use toubilib\api\actions\auth\RefreshAction;
 use toubilib\api\actions\EditRdvAction;
 use toubilib\api\actions\GetPraticienAction;
 use toubilib\api\actions\GetRdvAction;
@@ -27,6 +28,7 @@ return function (App $app): App {
         $app->get('/', GetRootAction::class);
         $app->post('/auth/signin', SigninAction::class);
         $app->post('/auth/signup', SignupAction::class);
+        $app->post('/auth/refresh', RefreshAction::class);
 
 
         $app->group('/praticiens', function (RouteCollectorProxy $app) {

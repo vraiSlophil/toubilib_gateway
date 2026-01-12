@@ -114,7 +114,6 @@ final class ServiceRdv implements ServiceRdvInterface
         };
     }
 
-
     public function listRdvsFiltered(ProfileDTO $user, ?\DateTimeImmutable $debut, ?\DateTimeImmutable $fin, ?string $praticienId, bool $pastOnly): array
     {
         $debutDefault = $pastOnly ? new DateTimeImmutable('-10 years') : new DateTimeImmutable('-1 year');

@@ -2,6 +2,7 @@
 
 use toubilib\api\actions\auth\SigninAction;
 use toubilib\api\actions\auth\SignupAction;
+use toubilib\api\actions\auth\RefreshAction;
 use toubilib\api\actions\AgendaPraticienAction;
 use toubilib\api\actions\CancelRdvAction;
 use toubilib\api\actions\CreateRdvAction;
@@ -13,6 +14,7 @@ use toubilib\api\actions\CreateIndisponibiliteAction;
 use toubilib\api\actions\ListIndisponibilitesAction;
 use toubilib\api\actions\DeleteIndisponibiliteAction;
 use toubilib\core\application\ports\api\providersInterfaces\AuthProviderInterface;
+use toubilib\core\application\ports\api\providersInterfaces\JwtManagerInterface;
 use toubilib\core\application\ports\api\servicesInterfaces\ServicePraticienInterface;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
@@ -71,6 +73,12 @@ return [
     SignupAction::class => static function ($c) {
         return new SignupAction(
             $c->get(AuthProviderInterface::class)
+        );
+    },
+
+    RefreshAction::class => static function ($c) {
+        return new RefreshAction(
+            $c->get(JwtManagerInterface::class)
         );
     },
 
