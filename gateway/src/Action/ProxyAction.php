@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
+use Slim\Psr7\Response;
 
 /**
  * Action générique qui propage méthode, URI et corps vers l'API toubilib.
@@ -21,46 +22,72 @@ final class ProxyAction
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $method = $request->getMethod();
+        $method = strtoupper($request->getMethod());
 
         $path = ltrim($request->getUri()->getPath(), '/'); // ex: api/praticiens/123
+        $upstreamPath = preg_replace('#^api/#', '', $path) ?? $path; // ex: praticiens/123
+
+        if ($method === 'OPTIONS') {
+            return $this->json($response->withStatus(204), null);
+        }
 
         $bodyStream = $request->getBody();
         if ($bodyStream->isSeekable()) {
             $bodyStream->rewind();
         }
 
-        try {
-            $apiResponse = $this->client->request($method, $path, [
-                'headers' => $this->forwardHeaders($request),
-                'body'    => (string) $bodyStream,
-                'query'   => $request->getQueryParams(),
+        $apiResponse = $this->client->request($method, $upstreamPath, [
+            'headers' => $this->forwardHeaders($request),
+            'body'    => (string) $bodyStream,
+            'query'   => $request->getQueryParams(),
+        ]);
+
+        $status = $apiResponse->getStatusCode();
+        $apiBody = (string) $apiResponse->getBody();
+
+        if ($status === 404) {
+            return $this->json($response->withStatus(404), [
+                'error' => ['message' => 'Praticien not found'],
             ]);
-        } catch (RequestException $e) {
-            $status = $e->getResponse()?->getStatusCode();
-            if ($status === 404) {
-                throw new HttpNotFoundException($request, 'Resource not found');
-            }
-
-            $status = $status ?? 502;
-            $apiResponse = $e->getResponse();
-            $response = $response->withStatus($status);
-
-            if ($apiResponse) {
-                $response->getBody()->write((string) $apiResponse->getBody());
-                $contentType = $apiResponse->getHeaderLine('Content-Type') ?: 'application/json';
-                return $response->withHeader('Content-Type', $contentType);
-            }
-
-            $response->getBody()->write(json_encode(['error' => 'Upstream error'], JSON_UNESCAPED_SLASHES));
-            return $response->withHeader('Content-Type', 'application/json');
         }
 
-        $response->getBody()->write((string) $apiResponse->getBody());
-        $contentType = $apiResponse->getHeaderLine('Content-Type') ?: 'application/json';
-        return $response
-            ->withStatus($apiResponse->getStatusCode())
-            ->withHeader('Content-Type', $contentType);
+        if ($status >= 500 && $this->looksLikeInvalidUuidError($apiBody)) {
+            return $this->json($response->withStatus(404), [
+                'error' => ['message' => 'Praticien not found'],
+            ]);
+        }
+
+        $decoded = json_decode($apiBody, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $this->jsonRaw($response->withStatus($status), $apiBody);
+        }
+
+        return $this->json($response->withStatus($status), [
+            'data' => $apiBody,
+        ]);
+    }
+
+    /** @param mixed $data */
+    private function json(ResponseInterface $response, $data): ResponseInterface
+    {
+        $payload = json_encode($data, JSON_UNESCAPED_SLASHES);
+        $response->getBody()->write($payload === false ? 'null' : $payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    private function jsonRaw(ResponseInterface $response, string $rawJson): ResponseInterface
+    {
+        $response->getBody()->write($rawJson);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    private function looksLikeInvalidUuidError(?string $body): bool
+    {
+        if ($body === null || $body === '') {
+            return false;
+        }
+
+        return (bool) preg_match('/(invalid input syntax for type uuid|SQLSTATE\[22P02])/i', $body);
     }
 
     /**

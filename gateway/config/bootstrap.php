@@ -11,7 +11,7 @@ $builder = new ContainerBuilder();
 $builder->addDefinitions([
     Client::class => function (ContainerInterface $c) {
         return new Client([
-            'base_uri' => 'http://api.toubilib:80/',
+            'base_uri' => 'http://api.toubilib:80/api/',
             'http_errors' => false,
             'timeout' => 10.0,
         ]);
