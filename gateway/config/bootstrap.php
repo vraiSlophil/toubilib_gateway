@@ -9,7 +9,17 @@ use Slim\Psr7\Response;
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions([
-    Client::class => function (ContainerInterface $c) {
+    // Client microservice praticiens
+    'client.praticiens' => function (ContainerInterface $c) {
+        return new Client([
+            'base_uri' => 'http://api.praticiens.toubilib:80/api/',
+            'http_errors' => false,
+            'timeout' => 10.0,
+        ]);
+    },
+
+    // Client API monolithique (autres routes)
+    'client.api' => function (ContainerInterface $c) {
         return new Client([
             'base_uri' => 'http://api.toubilib:80/api/',
             'http_errors' => false,

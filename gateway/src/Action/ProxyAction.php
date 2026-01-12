@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace toubilib\gateway\Action;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
@@ -16,8 +16,13 @@ use Slim\Psr7\Response;
  */
 final class ProxyAction
 {
-    public function __construct(private Client $client)
+    private Client $client;
+    private Client $praticiensClient;
+
+    public function __construct(ContainerInterface $container)
     {
+        $this->client = $container->get('client.api');
+        $this->praticiensClient = $container->get('client.praticiens');
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -25,6 +30,12 @@ final class ProxyAction
         $method = strtoupper($request->getMethod());
 
         $path = ltrim($request->getUri()->getPath(), '/'); // ex: api/praticiens/123
+
+        // Choix du service en fonction du chemin (exercice 3)
+        $targetClient = str_starts_with($path, 'api/praticiens')
+            ? $this->praticiensClient
+            : $this->client;
+
         $upstreamPath = preg_replace('#^api/#', '', $path) ?? $path; // ex: praticiens/123
 
         if ($method === 'OPTIONS') {
@@ -36,7 +47,7 @@ final class ProxyAction
             $bodyStream->rewind();
         }
 
-        $apiResponse = $this->client->request($method, $upstreamPath, [
+        $apiResponse = $targetClient->request($method, $upstreamPath, [
             'headers' => $this->forwardHeaders($request),
             'body'    => (string) $bodyStream,
             'query'   => $request->getQueryParams(),
