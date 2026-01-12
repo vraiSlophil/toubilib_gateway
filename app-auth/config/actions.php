@@ -3,6 +3,7 @@
 use toubilib\api\actions\auth\SigninAction;
 use toubilib\api\actions\auth\SignupAction;
 use toubilib\api\actions\auth\RefreshAction;
+use toubilib\api\actions\auth\ValidateTokenAction;
 use toubilib\api\actions\GetRootAction;
 use toubilib\core\application\ports\api\providersInterfaces\AuthProviderInterface;
 use toubilib\core\application\ports\api\providersInterfaces\JwtManagerInterface;
@@ -30,4 +31,9 @@ return [
         );
     },
 
+    ValidateTokenAction::class => static function ($c) {
+        return new ValidateTokenAction(
+            $c->get(JwtManagerInterface::class)
+        );
+    },
 ];
