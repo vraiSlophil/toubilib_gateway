@@ -5,12 +5,13 @@ use DI\ContainerBuilder;
 use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
 use Slim\Factory\AppFactory;
+use Slim\Psr7\Response;
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions([
     Client::class => function (ContainerInterface $c) {
         return new Client([
-            'base_uri' => 'http://api.toubilib:80/api/',
+            'base_uri' => 'http://api.toubilib:80/',
             'http_errors' => false,
             'timeout' => 10.0,
         ]);
@@ -21,14 +22,22 @@ $container = $builder->build();
 AppFactory::setContainer($container);
 
 $app = AppFactory::create();
+
+// Middleware Slim: routing + parsing + erreurs
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
+$errorMw = $app->addErrorMiddleware(true, true, true);
 
 /**
- * CORS middleware
+ * CORS middleware (gère aussi le préflight).
+ * Note: on laisse Slim router les autres requêtes, y compris 404, puis on ajoute les headers.
  */
 $app->add(function ($request, $handler) {
-    $response = $handler->handle($request);
+    if (strtoupper($request->getMethod()) === 'OPTIONS') {
+        $response = new Response(204);
+    } else {
+        $response = $handler->handle($request);
+    }
 
     return $response
         ->withHeader('Access-Control-Allow-Origin', '*')
@@ -36,9 +45,6 @@ $app->add(function ($request, $handler) {
         ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 });
 
-$app->options('/{routes:.*}', function ($request, $response) {
-    return $response;
-});
 
 (require __DIR__ . '/routes.php')($app);
 

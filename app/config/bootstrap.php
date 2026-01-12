@@ -6,7 +6,6 @@ use DI\DependencyException;
 use DI\NotFoundException;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
-use toubilib\api\middlewares\CorsMiddleware;
 
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -27,16 +26,6 @@ AppFactory::setContainer($c);
 $app = AppFactory::create();
 
 try {
-    $cors = $c->get('cors');
-} catch (DependencyException $e) {
-    echo "Erreur lors de la récupération des paramètres CORS : " . $e->getMessage();
-    exit(1);
-} catch (NotFoundException $e) {
-    echo "Paramètre 'cors' non trouvé dans le conteneur : " . $e->getMessage();
-    exit(1);
-}
-
-try {
     $settings = $c->get('settings');
 } catch (DependencyException $e) {
     echo "Erreur lors de la récupération des paramètres : " . $e->getMessage();
@@ -46,14 +35,6 @@ try {
     exit(1);
 }
 
-$app->add(new CorsMiddleware([
-    (string) 'allowed_origins' => $cors['allowed_origins'],
-    (string) 'allowed_methods' => $cors['allowed_methods'],
-    (string) 'allowed_headers' => $cors['allowed_headers'],
-    (string) 'exposed_headers' => $cors['exposed_headers'],
-    (bool) 'allow_credentials' => $cors['allow_credentials'],
-    (int) 'max_age' => $cors['max_age'],
-], $settings['displayErrorDetails'] ?? false));
 
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();

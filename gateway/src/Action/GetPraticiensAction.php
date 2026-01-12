@@ -15,8 +15,7 @@ final class GetPraticiensAction
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        // L'API toubilib expose la liste sur /api/praticiens
-        $apiResponse = $this->client->get('/api/praticiens');
+        $apiResponse = $this->client->get('praticiens');
 
         $response->getBody()->write((string) $apiResponse->getBody());
 
