@@ -6,6 +6,8 @@ use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Psr7\Response;
+use toubilib\gateway\Middleware\RdvRoutesAuthMiddleware;
+use toubilib\gateway\Middleware\AgendaPraticienAuthMiddleware;
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions([
@@ -47,6 +49,14 @@ $builder->addDefinitions([
             'http_errors' => false,
             'timeout' => 10.0,
         ]);
+    },
+
+    RdvRoutesAuthMiddleware::class => function (ContainerInterface $c) {
+        return new RdvRoutesAuthMiddleware($c->get('client.auth'));
+    },
+
+    AgendaPraticienAuthMiddleware::class => function (ContainerInterface $c) {
+        return new AgendaPraticienAuthMiddleware($c->get('client.auth'));
     },
 ]);
 
