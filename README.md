@@ -405,7 +405,7 @@ Elles ne sont accessibles que par le praticien propriétaire.
 
 ---
 
-#### 5\.5\.3 `DELETE /api/praticiens/{praticienId}/indisponibilites/{indispo_id}`
+#### 5\.5\.3 `DELETE /api/praticiens/{praticienId}/indisponibilites/{indispoId}`
 
 **Description**: suppression d'une indisponibilité.
 

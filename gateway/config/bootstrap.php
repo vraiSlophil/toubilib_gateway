@@ -6,8 +6,7 @@ use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
 use Slim\Factory\AppFactory;
 use Slim\Psr7\Response;
-use toubilib\gateway\Middleware\RdvRoutesAuthMiddleware;
-use toubilib\gateway\Middleware\AgendaPraticienAuthMiddleware;
+use toubilib\gateway\Middleware\AuthGatewayMiddleware;
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions([
@@ -51,12 +50,8 @@ $builder->addDefinitions([
         ]);
     },
 
-    RdvRoutesAuthMiddleware::class => function (ContainerInterface $c) {
-        return new RdvRoutesAuthMiddleware($c->get('client.auth'));
-    },
-
-    AgendaPraticienAuthMiddleware::class => function (ContainerInterface $c) {
-        return new AgendaPraticienAuthMiddleware($c->get('client.auth'));
+    AuthGatewayMiddleware::class => function (ContainerInterface $c) {
+        return new AuthGatewayMiddleware($c->get('client.auth'));
     },
 ]);
 
@@ -69,6 +64,7 @@ $app = AppFactory::create();
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
 $errorMw = $app->addErrorMiddleware(true, true, true);
+$errorMw->getDefaultErrorHandler()->forceContentType('application/json');
 
 /**
  * CORS middleware (gère aussi le préflight).

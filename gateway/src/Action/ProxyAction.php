@@ -36,18 +36,19 @@ final class ProxyAction
         $path = ltrim($request->getUri()->getPath(), '/');
 
         // Choix du service en fonction du chemin
-        if (str_starts_with($path, 'api/auth')) {
-            $targetClient = $this->authClient;
-            $isPraticiensRoute = false;
-        } elseif (str_starts_with($path, 'api/praticiens')) {
-            $targetClient = $this->praticiensClient;
-            $isPraticiensRoute = true;
-        } elseif (str_starts_with($path, 'api/rdvs')) {
-            $targetClient = $this->rdvClient;
-            $isPraticiensRoute = false;
-        } else {
-            $targetClient = $this->client;
-            $isPraticiensRoute = false;
+        switch (true) {
+            case str_starts_with($path, 'api/auth'):
+                $targetClient = $this->authClient;
+                break;
+            case str_starts_with($path, 'api/praticiens'):
+                $targetClient = $this->praticiensClient;
+                break;
+            case str_starts_with($path, 'api/rdvs'):
+                $targetClient = $this->rdvClient;
+                break;
+            default:
+                $targetClient = $this->client;
+                break;
         }
 
         $upstreamPath = preg_replace('#^api/#', '', $path) ?? $path;
@@ -76,13 +77,6 @@ final class ProxyAction
             ]);
         }
 
-        // Cas "UUID invalide" => uniquement pour les routes praticiens
-        if ($isPraticiensRoute && $status >= 500 && $this->looksLikeInvalidUuidError($apiBody)) {
-            return $this->json($response->withStatus(404), [
-                'error' => ['message' => 'Resource not found'],
-            ]);
-        }
-
         $decoded = json_decode($apiBody, true);
         if (json_last_error() === JSON_ERROR_NONE) {
             return $this->jsonRaw($response->withStatus($status), $apiBody);
@@ -105,15 +99,6 @@ final class ProxyAction
     {
         $response->getBody()->write($rawJson);
         return $response->withHeader('Content-Type', 'application/json');
-    }
-
-    private function looksLikeInvalidUuidError(?string $body): bool
-    {
-        if ($body === null || $body === '') {
-            return false;
-        }
-
-        return (bool) preg_match('/(invalid input syntax for type uuid|SQLSTATE\[22P02])/i', $body);
     }
 
     /**

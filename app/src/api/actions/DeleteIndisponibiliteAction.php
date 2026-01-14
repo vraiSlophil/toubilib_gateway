@@ -19,7 +19,7 @@ final class DeleteIndisponibiliteAction
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $praticienId = $args['praticienId'];
-        $indispoId = $args['indispo_id'];
+        $indispoId = $args['indispoId'];
 
         try {
             // Verify the indisponibilite belongs to this praticien

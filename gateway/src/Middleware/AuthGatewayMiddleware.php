@@ -20,7 +20,9 @@ use Slim\Exception\HttpUnauthorizedException;
  */
 final class AuthGatewayMiddleware implements MiddlewareInterface
 {
-    public function __construct(private Client $authClient)
+    public function __construct(
+        private Client $authClient
+    )
     {
     }
 
@@ -56,4 +58,3 @@ final class AuthGatewayMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 }
-

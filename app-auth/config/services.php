@@ -1,6 +1,5 @@
 <?php
 
-use toubilib\api\middlewares\AuthnMiddleware;
 use toubilib\api\providers\auth\JwtAuthProvider;
 use toubilib\api\providers\auth\JwtManager;
 use toubilib\core\application\ports\api\providersInterfaces\AuthProviderInterface;
@@ -47,10 +46,4 @@ return [
         );
     },
 
-    // --- Middlewares (utile pour l'exercice 3/4 ensuite) ---
-    AuthnMiddleware::class => static function ($c) {
-        return new AuthnMiddleware(
-            $c->get(AuthProviderInterface::class)
-        );
-    },
 ];

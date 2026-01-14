@@ -11,8 +11,10 @@ final class GetRootAction
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $links = [
-            'praticiens' => ['href' => '/api/praticiens'],
-            'rdvs' => ['href' => '/api/rdvs{?praticienId,debut,fin}', 'templated' => true]
+            'signup' => ['href' => '/api/auth/signup', 'method' => 'POST'],
+            'signin' => ['href' => '/api/auth/signin', 'method' => 'POST'],
+            'refresh' => ['href' => '/api/auth/refresh', 'method' => 'POST'],
+            'validate' => ['href' => '/api/tokens/validate', 'method' => 'POST']
         ];
         return ApiResponseBuilder::create()
             ->status(200)

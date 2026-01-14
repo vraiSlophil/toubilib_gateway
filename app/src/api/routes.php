@@ -54,7 +54,7 @@ return function (App $app): App {
 //                    ->add(new AuthzMiddleware($app->getContainer()->get(AuthzService::class), 'manageIndisponibilites'))
 //                    ->add(AuthnMiddleware::class)
                 ;
-                $app->delete('/indisponibilites/{indispo_id}', DeleteIndisponibiliteAction::class)
+                $app->delete('/indisponibilites/{indispoId}', DeleteIndisponibiliteAction::class)
 //                    ->add(new AuthzMiddleware($app->getContainer()->get(AuthzService::class), 'manageIndisponibilites'))
 //                    ->add(AuthnMiddleware::class)
                 ;

@@ -4,10 +4,8 @@ namespace toubilib\infra\repositories;
 
 use Exception;
 use PDO;
-use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\AuthRepositoryInterface;
 use toubilib\core\domain\entities\User;
-use toubilib\core\domain\exceptions\DuplicateEmailException;
 
 class PDOAuthRepository implements AuthRepositoryInterface
 {
