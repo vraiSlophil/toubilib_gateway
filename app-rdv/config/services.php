@@ -24,8 +24,9 @@ return [
 
     // Client HTTP vers microservice praticiens
     'client.praticiens' => static function ($c) {
+        $baseUri = getenv('PRATICIENS_API_BASE_URI') ?: 'http://api.praticiens:80/api/';
         return new Client([
-            'base_uri' => 'http://api.praticiens.toubilib:80/api/',
+            'base_uri' => rtrim($baseUri, '/') . '/',
             'http_errors' => false,
             'timeout' => 10.0,
         ]);

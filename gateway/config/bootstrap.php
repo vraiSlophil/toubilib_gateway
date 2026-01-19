@@ -4,7 +4,9 @@ declare(strict_types=1);
 use DI\ContainerBuilder;
 use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Factory\AppFactory;
+use Slim\Exception\HttpException;
 use Slim\Psr7\Response;
 use toubilib\gateway\Middleware\AuthGatewayMiddleware;
 
@@ -60,11 +62,60 @@ AppFactory::setContainer($container);
 
 $app = AppFactory::create();
 
+// Journalisation des erreurs PHP
+$logsDir = __DIR__ . '/../var/logs';
+if (!is_dir($logsDir)) {
+    @mkdir($logsDir, 0777, true);
+}
+ini_set('log_errors', '1');
+ini_set('error_log', $logsDir . '/errors.log');
+
 // Middleware Slim: routing + parsing + erreurs
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
 $errorMw = $app->addErrorMiddleware(true, true, true);
-$errorMw->getDefaultErrorHandler()->forceContentType('application/json');
+$errorMw->setDefaultErrorHandler(
+    function (
+        ServerRequestInterface $request,
+        Throwable $exception,
+        bool $displayErrorDetails,
+        bool $logErrors,
+        bool $logErrorDetails
+    ) use ($app): \Psr\Http\Message\ResponseInterface {
+        $status = 500;
+        if ($exception instanceof HttpException) {
+            $status = $exception->getCode();
+        } elseif (method_exists($exception, 'getStatusCode')) {
+            $status = (int) $exception->getStatusCode();
+        }
+        if ($status < 400 || $status > 599) {
+            $status = 500;
+        }
+
+        if ($logErrors && $status <= 500) {
+            $uri = (string) $request->getUri();
+            $line = sprintf(
+                '[%s] %s %s %d %s (%s)',
+                date('c'),
+                $request->getMethod(),
+                $uri,
+                $status,
+                $exception->getMessage(),
+                $exception::class
+            );
+            error_log($line);
+            if ($logErrorDetails) {
+                error_log($exception->getTraceAsString());
+            }
+        }
+
+        $message = $displayErrorDetails ? $exception->getMessage() : 'Internal server error';
+        $payload = json_encode(['error' => ['message' => $message]], JSON_UNESCAPED_SLASHES);
+        $response = $app->getResponseFactory()->createResponse($status);
+        $response->getBody()->write($payload === false ? 'null' : $payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+);
 
 /**
  * CORS middleware (gère aussi le préflight).

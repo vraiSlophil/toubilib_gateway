@@ -10,6 +10,7 @@ final class ApiResponseBuilder implements ApiResponseBuilderInterface
 {
     private ?array $data = null;
     private ?array $error = null;
+    private ?Throwable $exception = null;
     private array $links = [];
     private array $headers = ['Content-Type' => 'application/json'];
     private int $status = 200;
@@ -63,6 +64,7 @@ final class ApiResponseBuilder implements ApiResponseBuilderInterface
 
     public function error(string $publicMessage, ?Throwable $e = null): self
     {
+        $this->exception = $e;
         if ($this->debug && $e) {
             $this->error = [
                 'type' => $e::class,
@@ -78,6 +80,21 @@ final class ApiResponseBuilder implements ApiResponseBuilderInterface
 
     public function build(ResponseInterface $response): ResponseInterface
     {
+        if ($this->error !== null && $this->status >= 400 && $this->status <= 500) {
+            $message = $this->error['message'] ?? 'Unknown error';
+            $line = sprintf('[%s] %d %s', date('c'), $this->status, $message);
+            error_log($line);
+            if ($this->exception) {
+                error_log(sprintf(
+                    '%s in %s:%d',
+                    $this->exception->getMessage(),
+                    $this->exception->getFile(),
+                    $this->exception->getLine()
+                ));
+                error_log($this->exception->getTraceAsString());
+            }
+        }
+
         $payload = $this->error
             ? ['error' => $this->error]
             : ['data' => $this->data];

@@ -68,10 +68,22 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
             return null;
         }
 
+        $specialiteData = $p['specialite'] ?? null;
+        $specialiteLibelle = 'N/A';
+        $specialiteDescription = null;
+        if (is_array($specialiteData)) {
+            $specialiteLibelle = (string)($specialiteData['libelle'] ?? 'N/A');
+            $specialiteDescription = isset($specialiteData['description'])
+                ? (string)$specialiteData['description']
+                : null;
+        } elseif ($specialiteData !== null) {
+            $specialiteLibelle = (string)$specialiteData;
+        }
+
         $specialite = new Specialite(
             (int)($p['specialiteId'] ?? 0),
-            (string)($p['specialite'] ?? 'N/A'),
-            (string)($p['specialite'] ?? 'N/A')
+            $specialiteLibelle,
+            $specialiteDescription
         );
 
         $structure = null;
@@ -170,4 +182,3 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
         }, is_array($items) ? $items : []);
     }
 }
-
