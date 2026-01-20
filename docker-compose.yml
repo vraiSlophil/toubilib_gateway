@@ -73,6 +73,7 @@ services:
     depends_on:
       - toubirdv.db
       - api.praticiens
+      - rabbitmq
     env_file: ./app/config/.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
@@ -92,6 +93,42 @@ services:
       - toubiauth.db
     env_file: ./app/config/.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
+
+  # service microservice envoi de mails (placeholder)
+  mailer.toubilib:
+    build:
+      context: build
+      dockerfile: 8.4-cli.Dockerfile
+    ports:
+      - '6084:80'
+    volumes:
+      - ./app-mailer:/var/php
+    working_dir: /var/php
+    networks:
+      - toubilib.net
+    depends_on:
+      - rabbitmq
+    env_file: ./app/config/.env
+    command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
+
+  # service RabbitMQ
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 8s
+      timeout: 30s
+      retries: 3
+    networks:
+      - toubilib.net
+    volumes:
+      - ./rabbitmq.toubi:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=toubi
+      - RABBITMQ_DEFAULT_PASS=toubi
 
   toubiprati.db:
     image: 'postgres:latest'
