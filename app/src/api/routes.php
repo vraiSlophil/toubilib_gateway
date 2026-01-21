@@ -19,6 +19,11 @@ use toubilib\api\actions\ListRdvsAction;
 use toubilib\api\actions\CreateIndisponibiliteAction;
 use toubilib\api\actions\ListIndisponibilitesAction;
 use toubilib\api\actions\DeleteIndisponibiliteAction;
+use toubilib\api\actions\ListPatientsAction;
+use toubilib\api\actions\GetPatientAction;
+use toubilib\api\actions\CreatePatientAction;
+use toubilib\api\actions\UpdatePatientAction;
+use toubilib\api\actions\DeletePatientAction;
 use toubilib\api\middlewares\AuthnMiddleware;
 use toubilib\api\middlewares\AuthzMiddleware;
 use toubilib\core\application\usecases\AuthzService;
@@ -90,6 +95,16 @@ return function (App $app): App {
 //                ->add(AuthnMiddleware::class)
             ;
         });
+
+        $app->group('/patients', function (RouteCollectorProxy $app) {
+            $app->get('', ListPatientsAction::class);
+            $app->post('', CreatePatientAction::class);
+            $app->group('/{patientId}', function (RouteCollectorProxy $app) {
+                $app->get('', GetPatientAction::class);
+                $app->put('', UpdatePatientAction::class);
+                $app->delete('', DeletePatientAction::class);
+            });
+        })->add(AuthnMiddleware::class);
 //        })->add(AuthnMiddleware::class);
     });
 

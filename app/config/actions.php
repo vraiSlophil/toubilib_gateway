@@ -13,10 +13,16 @@ use toubilib\api\actions\ListRdvsAction;
 use toubilib\api\actions\CreateIndisponibiliteAction;
 use toubilib\api\actions\ListIndisponibilitesAction;
 use toubilib\api\actions\DeleteIndisponibiliteAction;
+use toubilib\api\actions\ListPatientsAction;
+use toubilib\api\actions\GetPatientAction;
+use toubilib\api\actions\CreatePatientAction;
+use toubilib\api\actions\UpdatePatientAction;
+use toubilib\api\actions\DeletePatientAction;
 use toubilib\core\application\ports\api\providersInterfaces\AuthProviderInterface;
 use toubilib\core\application\ports\api\providersInterfaces\JwtManagerInterface;
 use toubilib\core\application\ports\api\servicesInterfaces\ServicePraticienInterface;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
+use toubilib\core\application\ports\api\servicesInterfaces\ServicePatientInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
 use toubilib\core\application\usecases\ServiceIndisponibilite;
 
@@ -97,6 +103,36 @@ return [
     DeleteIndisponibiliteAction::class => static function ($c) {
         return new DeleteIndisponibiliteAction(
             $c->get(ServiceIndisponibilite::class)
+        );
+    },
+
+    ListPatientsAction::class => static function ($c) {
+        return new ListPatientsAction(
+            $c->get(ServicePatientInterface::class)
+        );
+    },
+
+    GetPatientAction::class => static function ($c) {
+        return new GetPatientAction(
+            $c->get(ServicePatientInterface::class)
+        );
+    },
+
+    CreatePatientAction::class => static function ($c) {
+        return new CreatePatientAction(
+            $c->get(ServicePatientInterface::class)
+        );
+    },
+
+    UpdatePatientAction::class => static function ($c) {
+        return new UpdatePatientAction(
+            $c->get(ServicePatientInterface::class)
+        );
+    },
+
+    DeletePatientAction::class => static function ($c) {
+        return new DeletePatientAction(
+            $c->get(ServicePatientInterface::class)
         );
     },
 
