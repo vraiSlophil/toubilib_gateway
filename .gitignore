@@ -27,5 +27,7 @@ composer.lock
 /docs/*
 arbo.txt
 
+/rabbitmq.toubi/
+/rabbitmq.*/
 rabbitmq.*
 .erlang.cookie
