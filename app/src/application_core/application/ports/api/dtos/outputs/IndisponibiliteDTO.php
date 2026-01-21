@@ -40,6 +40,10 @@ final class IndisponibiliteDTO implements JsonSerializable
                 'self' => [
                     'href' => "/api/praticiens/{$this->praticienId}/indisponibilites/{$this->id}"
                 ],
+                'update' => [
+                    'href' => "/api/praticiens/{$this->praticienId}/indisponibilites/{$this->id}",
+                    'method' => 'PUT'
+                ],
                 'delete' => [
                     'href' => "/api/praticiens/{$this->praticienId}/indisponibilites/{$this->id}",
                     'method' => 'DELETE'
@@ -48,4 +52,3 @@ final class IndisponibiliteDTO implements JsonSerializable
         ];
     }
 }
-

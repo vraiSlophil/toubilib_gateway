@@ -1,0 +1,28 @@
+meta {
+  name: PUT-patient
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{API_SRC}}/patients/{{patientId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+body:json {
+  {
+    "nom": "Durand",
+    "prenom": "Alice",
+    "dateNaissance": "1990-05-12",
+    "adresse": "34 avenue Foch",
+    "codePostal": "54000",
+    "ville": "Nancy",
+    "email": "{{patientEmail}}",
+    "telephone": "0699887766"
+  }
+}
