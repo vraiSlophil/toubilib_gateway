@@ -83,6 +83,53 @@ final class ServiceIndisponibilite
         $this->indisponibiliteRepository->delete($id);
     }
 
+    public function updateIndisponibilite(string $id, InputIndisponibiliteDTO $input): IndisponibiliteDTO
+    {
+        $existing = $this->indisponibiliteRepository->getById($id);
+        if ($existing === null) {
+            throw new IndisponibiliteNotFoundException('Indisponibilite not found');
+        }
+        if ($existing->getPraticienId() !== $input->praticienId) {
+            throw new IndisponibiliteNotFoundException('Indisponibilite not found');
+        }
+
+        $existingRdvs = $this->rdvRepository->listForPraticienBetween(
+            $input->praticienId,
+            $input->debut,
+            $input->fin
+        );
+        if (count($existingRdvs) > 0) {
+            throw new IndisponibiliteConflictException(
+                'Cannot update indisponibilite: existing appointments in this period'
+            );
+        }
+
+        $existingIndispos = $this->indisponibiliteRepository->listForPraticienBetween(
+            $input->praticienId,
+            $input->debut,
+            $input->fin
+        );
+        foreach ($existingIndispos as $indispo) {
+            if ($indispo->getId() !== $id) {
+                throw new IndisponibiliteConflictException(
+                    'Cannot update indisponibilite: overlapping with existing indisponibilite'
+                );
+            }
+        }
+
+        $updated = new Indisponibilite(
+            $existing->getId(),
+            $existing->getPraticienId(),
+            $input->debut,
+            $input->fin,
+            $input->motif,
+            $existing->getCreatedAt()
+        );
+
+        $this->indisponibiliteRepository->update($updated);
+        return IndisponibiliteDTO::fromEntity($updated);
+    }
+
     /**
      * Check if a praticien has any indisponibilite during a given period
      */
@@ -92,4 +139,3 @@ final class ServiceIndisponibilite
         return count($indispos) > 0;
     }
 }
-

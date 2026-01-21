@@ -66,6 +66,6 @@ final class Rdv
 
     public function setStatus(bool $status): void
     {
-        $this->status = $status ? self::STATUS_NOT_OK : self::STATUS_OK;
+        $this->status = $status ? self::STATUS_OK : self::STATUS_NOT_OK;
     }
 }

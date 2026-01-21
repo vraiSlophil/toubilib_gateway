@@ -7,6 +7,7 @@ namespace toubilib\api\actions;
 use DateTimeImmutable;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 use toubilib\core\application\ports\api\dtos\outputs\ProfileDTO;
 use toubilib\core\application\ports\api\dtos\outputs\RendezVousDTO;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
@@ -20,12 +21,38 @@ final class ListRdvsAction
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        /** @var ProfileDTO $user */
+        /** @var ProfileDTO|null $user */
         $user = $request->getAttribute('authenticated_user');
+        if ($user === null) {
+            return ApiResponseBuilder::create()
+                ->status(401)
+                ->error('Unauthorized')
+                ->build($response);
+        }
         $queryParams = $request->getQueryParams();
 
-        $debut = isset($queryParams['debut']) ? new DateTimeImmutable($queryParams['debut']) : null;
-        $fin = isset($queryParams['fin']) ? new DateTimeImmutable($queryParams['fin']) : null;
+        $debut = null;
+        $fin = null;
+        try {
+            if (isset($queryParams['debut'])) {
+                $debut = new DateTimeImmutable($queryParams['debut']);
+            }
+            if (isset($queryParams['fin'])) {
+                $fin = new DateTimeImmutable($queryParams['fin']);
+            }
+        } catch (Throwable $e) {
+            return ApiResponseBuilder::create()
+                ->status(400)
+                ->error('Invalid date range', $e)
+                ->build($response);
+        }
+
+        if ($debut && $fin && $debut > $fin) {
+            return ApiResponseBuilder::create()
+                ->status(400)
+                ->error('Invalid date range')
+                ->build($response);
+        }
         $praticienId = $queryParams['praticienId'] ?? null;
         $pastOnly = isset($queryParams['history']) || str_ends_with($request->getUri()->getPath(), '/history');
 

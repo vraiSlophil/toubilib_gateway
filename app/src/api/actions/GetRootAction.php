@@ -12,7 +12,8 @@ final class GetRootAction
     {
         $links = [
             'praticiens' => ['href' => '/api/praticiens'],
-            'rdvs' => ['href' => '/api/rdvs{?praticienId,debut,fin}', 'templated' => true]
+            'rdvs' => ['href' => '/api/rdvs{?praticienId,debut,fin}', 'templated' => true],
+            'patients' => ['href' => '/api/patients']
         ];
         return ApiResponseBuilder::create()
             ->status(200)

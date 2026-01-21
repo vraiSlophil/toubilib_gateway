@@ -23,10 +23,12 @@ return function (App $app): App {
                 ->add(new AuthzMiddleware($c->get(AuthzService::class), 'listRdvs'));
             $app->get('/{rdvId}', GetRdvAction::class)
                 ->add(new AuthzMiddleware($c->get(AuthzService::class), 'viewRdv'));
-            $app->patch('/{rdvId}', EditRdvAction::class);
+            $app->patch('/{rdvId}', EditRdvAction::class)
+                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'editRdv'));
             $app->post('', CreateRdvAction::class)
                 ->add(new AuthzMiddleware($c->get(AuthzService::class), 'createRdv'));
-            $app->delete('/{rdvId}', CancelRdvAction::class);
+            $app->delete('/{rdvId}', CancelRdvAction::class)
+                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'cancelRdv'));
         });
     });
 

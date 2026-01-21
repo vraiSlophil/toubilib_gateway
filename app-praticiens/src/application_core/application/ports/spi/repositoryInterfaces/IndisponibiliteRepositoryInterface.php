@@ -31,5 +31,9 @@ interface IndisponibiliteRepositoryInterface
      * Delete an indisponibilite
      */
     public function delete(string $id): void;
-}
 
+    /**
+     * Update an indisponibilite
+     */
+    public function update(Indisponibilite $indisponibilite): void;
+}

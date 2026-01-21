@@ -95,6 +95,18 @@ final class ApiResponseBuilder implements ApiResponseBuilderInterface
             }
         }
 
+        if (in_array($this->status, [204, 304], true)) {
+            $response = $response->withStatus($this->status);
+            foreach ($this->headers as $k => $v) {
+                $lower = strtolower($k);
+                if (str_starts_with($lower, 'access-control-') && $response->hasHeader($k)) {
+                    continue;
+                }
+                $response = $response->withHeader($k, $v);
+            }
+            return $response;
+        }
+
         $payload = $this->error
             ? ['error' => $this->error]
             : ['data' => $this->data];

@@ -8,9 +8,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use toubilib\core\application\ports\api\dtos\inputs\InputIndisponibiliteDTO;
 use toubilib\core\application\usecases\ServiceIndisponibilite;
 use toubilib\core\domain\exceptions\IndisponibiliteConflictException;
+use toubilib\core\domain\exceptions\IndisponibiliteNotFoundException;
 use toubilib\infra\adapters\ApiResponseBuilder;
 
-final class CreateIndisponibiliteAction
+final class UpdateIndisponibiliteAction
 {
     public function __construct(
         private ServiceIndisponibilite $serviceIndisponibilite
@@ -19,10 +20,17 @@ final class CreateIndisponibiliteAction
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $praticienId = $args['praticienId'];
+        $praticienId = $args['praticienId'] ?? '';
+        $indispoId = $args['indispoId'] ?? '';
         $body = $request->getParsedBody();
 
-        // Validation
+        if ($praticienId === '' || $indispoId === '') {
+            return ApiResponseBuilder::create()
+                ->status(400)
+                ->error('Missing praticienId or indispoId')
+                ->build($response);
+        }
+
         if (!isset($body['debut']) || !isset($body['fin'])) {
             return ApiResponseBuilder::create()
                 ->status(400)
@@ -55,15 +63,16 @@ final class CreateIndisponibiliteAction
         );
 
         try {
-            $id = $this->serviceIndisponibilite->creerIndisponibilite($input);
-            $indispo = $this->serviceIndisponibilite->getById($id);
-            $location = "/api/praticiens/{$praticienId}/indisponibilites/{$id}";
+            $updated = $this->serviceIndisponibilite->updateIndisponibilite($indispoId, $input);
 
             return ApiResponseBuilder::create()
-                ->status(201)
-                ->data($indispo)
-                ->header('Location', $location)
-                ->links(['self' => ['href' => $location]])
+                ->status(200)
+                ->data($updated)
+                ->build($response);
+        } catch (IndisponibiliteNotFoundException $e) {
+            return ApiResponseBuilder::create()
+                ->status(404)
+                ->error($e->getMessage())
                 ->build($response);
         } catch (IndisponibiliteConflictException $e) {
             return ApiResponseBuilder::create()

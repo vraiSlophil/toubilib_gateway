@@ -1,10 +1,10 @@
 meta {
-  name: DELETE-indisponibilite
+  name: GET-indisponibilite
   type: http
-  seq: 5
+  seq: 3
 }
 
-delete {
+get {
   url: {{API_SRC}}/praticiens/{{praticienId}}/indisponibilites/{{indispoId}}
   body: none
   auth: none
@@ -12,8 +12,4 @@ delete {
 
 headers {
   Authorization: Bearer {{accessToken}}
-}
-
-vars:pre-request {
-  indispoId: 019b13d7-052b-716f-ae9f-5417260ebab0
 }

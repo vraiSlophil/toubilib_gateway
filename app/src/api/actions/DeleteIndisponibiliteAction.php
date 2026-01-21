@@ -4,7 +4,6 @@ namespace toubilib\api\actions;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Response;
 use toubilib\core\application\usecases\ServiceIndisponibilite;
 use toubilib\core\domain\exceptions\IndisponibiliteNotFoundException;
 use toubilib\infra\adapters\ApiResponseBuilder;
@@ -28,14 +27,14 @@ final class DeleteIndisponibiliteAction
                 return ApiResponseBuilder::create()
                     ->status(404)
                     ->error('Indisponibilite not found')
-                    ->build(new Response());
+                    ->build($response);
             }
 
             if ($indispo->praticienId !== $praticienId) {
                 return ApiResponseBuilder::create()
                     ->status(403)
                     ->error('Forbidden')
-                    ->build(new Response());
+                    ->build($response);
             }
 
             $this->serviceIndisponibilite->supprimerIndisponibilite($indispoId);
@@ -45,13 +44,12 @@ final class DeleteIndisponibiliteAction
             return ApiResponseBuilder::create()
                 ->status(404)
                 ->error($e->getMessage())
-                ->build(new Response());
+                ->build($response);
         } catch (\Exception $e) {
             return ApiResponseBuilder::create()
                 ->status(500)
                 ->error($e->getMessage())
-                ->build(new Response());
+                ->build($response);
         }
     }
 }
-

@@ -4,7 +4,6 @@ namespace toubilib\api\actions;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Response;
 use toubilib\core\application\usecases\ServiceIndisponibilite;
 use toubilib\infra\adapters\ApiResponseBuilder;
 
@@ -35,14 +34,13 @@ final class ListIndisponibilitesAction
                         'method' => 'POST'
                     ]
                 ])
-                ->build(new Response());
+                ->build($response);
         } catch (\Exception $e) {
             return ApiResponseBuilder::create()
                 ->status(500)
                 ->error($e->getMessage())
-                ->build(new Response());
+                ->build($response);
         }
     }
 
 }
-

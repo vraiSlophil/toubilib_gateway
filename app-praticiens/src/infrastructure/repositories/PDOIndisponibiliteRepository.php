@@ -83,6 +83,20 @@ final class PDOIndisponibiliteRepository implements IndisponibiliteRepositoryInt
         $stmt->execute(['id' => $id]);
     }
 
+    public function update(Indisponibilite $indisponibilite): void
+    {
+        $sql = "UPDATE indisponibilite
+                SET debut = :debut, fin = :fin, motif = :motif
+                WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            'id' => $indisponibilite->getId(),
+            'debut' => $indisponibilite->getDebut()->format('Y-m-d H:i:s'),
+            'fin' => $indisponibilite->getFin()->format('Y-m-d H:i:s'),
+            'motif' => $indisponibilite->getMotif(),
+        ]);
+    }
+
     private function hydrateFromRow(array $row): Indisponibilite
     {
         return new Indisponibilite(
@@ -95,4 +109,3 @@ final class PDOIndisponibiliteRepository implements IndisponibiliteRepositoryInt
         );
     }
 }
-

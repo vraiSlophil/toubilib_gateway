@@ -27,15 +27,27 @@ class EditRdvAction
 
         $body = $request->getParsedBody();
 
-        if (!isset($body['status']) || !is_bool($body['status'])) {
+        if (!array_key_exists('status', $body)) {
             return ApiResponseBuilder::create()
                 ->status(400)
-                ->error('Invalid or missing status field. Must be a boolean')
+                ->error('Missing status field')
+                ->build($response);
+        }
+
+        $status = $body['status'];
+        if (is_bool($status)) {
+            $statusBool = $status;
+        } elseif (is_int($status) && ($status === 0 || $status === 1)) {
+            $statusBool = (bool)$status;
+        } else {
+            return ApiResponseBuilder::create()
+                ->status(400)
+                ->error('Invalid status field. Must be a boolean or 0/1')
                 ->build($response);
         }
 
         try {
-            $this->serviceRdv->updateRdvStatus($rdvId, $body['status']);
+            $this->serviceRdv->updateRdvStatus($rdvId, $statusBool);
 
             return ApiResponseBuilder::create()
                 ->status(200)
