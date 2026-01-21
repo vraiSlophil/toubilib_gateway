@@ -75,15 +75,23 @@ final class CreateRdvAction
         }
 
         $location = '/api/rdvs/' . $rdvId;
-        $links = [
+        $resourceLinks = [
             'self' => ['href' => $location],
-            'cancel' => ['href' => $location, 'method' => 'DELETE']
+            'cancel' => ['href' => $location, 'meta' => ['method' => 'DELETE']]
         ];
+        $resource = ApiResponseBuilder::resource('rdvs', $rdvId, [], $resourceLinks);
+        $rdv = $this->serviceRdv->getRdvById($rdvId);
+        if ($rdv !== null) {
+            $attributes = $rdv->jsonSerialize();
+            $praticienId = (string)($attributes['praticienId'] ?? '');
+            $resourceLinks['praticien'] = ['href' => '/api/praticiens/' . $praticienId];
+            $resource = ApiResponseBuilder::resourceFromAttributes('rdvs', $attributes, 'id', $resourceLinks);
+        }
 
         return ApiResponseBuilder::create()
             ->status(201)
-            ->data(['rdv_id' => $rdvId])
-            ->links($links)
+            ->data($resource)
+            ->links(['self' => ['href' => $location]])
             ->header('Location', $location)
             ->build($response);
     }

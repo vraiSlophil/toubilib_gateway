@@ -35,14 +35,15 @@ final class GetPatientAction
             return ApiResponseBuilder::create()->status(404)->error('Patient not found')->build($response);
         }
 
-        $data = $patient->jsonSerialize();
-        $data['_links'] = [
+        $attributes = $patient->jsonSerialize();
+        $links = [
             'self' => ['href' => '/api/patients/' . $patientId],
         ];
 
         return ApiResponseBuilder::create()
             ->status(200)
-            ->data($data)
+            ->data(ApiResponseBuilder::resourceFromAttributes('patients', $attributes, 'id', $links))
+            ->links(['self' => ['href' => '/api/patients/' . $patientId]])
             ->build($response);
     }
 }

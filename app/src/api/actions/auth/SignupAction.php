@@ -52,11 +52,15 @@ class SignupAction
 
         return ApiResponseBuilder::create()
             ->status(201)
-            ->data([
-                'id' => $profile->ID,
-                'email' => $profile->email,
-                'role' => $profile->role
-            ])
+            ->data(ApiResponseBuilder::resource(
+                'profiles',
+                (string)$profile->ID,
+                [
+                    'email' => $profile->email,
+                    'role' => $profile->role
+                ]
+            ))
+            ->links(['self' => ['href' => '/api/auth/signup']])
             ->build($response);
     }
 }

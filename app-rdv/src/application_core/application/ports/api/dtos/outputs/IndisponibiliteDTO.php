@@ -35,20 +35,7 @@ final class IndisponibiliteDTO implements JsonSerializable
             'praticienId' => $this->praticienId,
             'debut' => $this->debut->format('c'),
             'fin' => $this->fin->format('c'),
-            'motif' => $this->motif,
-            '_links' => [
-                'self' => [
-                    'href' => "/api/praticiens/{$this->praticienId}/indisponibilites/{$this->id}"
-                ],
-                'update' => [
-                    'href' => "/api/praticiens/{$this->praticienId}/indisponibilites/{$this->id}",
-                    'method' => 'PUT'
-                ],
-                'delete' => [
-                    'href' => "/api/praticiens/{$this->praticienId}/indisponibilites/{$this->id}",
-                    'method' => 'DELETE'
-                ]
-            ]
+            'motif' => $this->motif
         ];
     }
 }

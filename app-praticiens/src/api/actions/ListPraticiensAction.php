@@ -34,21 +34,32 @@ final class ListPraticiensAction
                 : $this->service->listerPraticiens();
 
             $items = array_map(static function ($dto) {
-                $data = $dto->jsonSerialize();
-                $data['_links'] = [
-                    'self' => ['href' => '/api/praticiens/' . $data['id']],
-                    'rdvs' => [
-                        'href' => '/api/praticiens/' . $data['id'] . '/rdvs{?debut,fin}',
-                        'templated' => true,
-                    ],
+                $attributes = $dto->jsonSerialize();
+                $id = (string)($attributes['id'] ?? '');
+                unset($attributes['id']);
+                $links = [
+                    'self' => ['href' => '/api/praticiens/' . $id],
+                    'rdvs' => ['href' => '/api/praticiens/' . $id . '/rdvs'],
                 ];
-                return $data;
+                return ApiResponseBuilder::resource('praticiens', $id, $attributes, $links);
             }, $praticiens);
+
+            $query = [];
+            if ($specialiteId !== null) {
+                $query['specialiteId'] = $specialiteId;
+            }
+            if ($ville !== null) {
+                $query['ville'] = $ville;
+            }
+            $self = '/api/praticiens';
+            if ($query) {
+                $self .= '?' . http_build_query($query);
+            }
 
             return ApiResponseBuilder::create()
                 ->status(200)
                 ->data($items)
-                ->links(['self' => ['href' => '/api/praticiens{?specialiteId,ville}']])
+                ->links(['self' => ['href' => $self]])
                 ->build($response);
         } catch (Throwable $e) {
             return ApiResponseBuilder::create()

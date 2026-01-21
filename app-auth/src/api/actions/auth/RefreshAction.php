@@ -63,12 +63,25 @@ final class RefreshAction
             'role' => (int) $upr['role'],
         ], JwtManagerInterface::REFRESH_TOKEN);
 
+        $profile = [
+            'id' => (string)$upr['id'],
+            'email' => (string)$upr['email'],
+            'role' => (int)$upr['role'],
+        ];
+        $attributes = [
+            'accessToken' => $newAccess,
+            'refreshToken' => $newRefresh,
+            'profile' => $profile,
+        ];
+
         return ApiResponseBuilder::create()
             ->status(200)
-            ->data([
-                'accessToken' => $newAccess,
-                'refreshToken' => $newRefresh,
-            ])
+            ->data(ApiResponseBuilder::resource(
+                'tokens',
+                (string)$upr['id'],
+                $attributes
+            ))
+            ->links(['self' => ['href' => '/api/auth/refresh']])
             ->build($response);
     }
 }

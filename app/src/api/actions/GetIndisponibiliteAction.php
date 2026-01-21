@@ -41,9 +41,18 @@ final class GetIndisponibiliteAction
                 ->build($response);
         }
 
+        $attributes = $indispo->jsonSerialize();
+        $base = "/api/praticiens/{$praticienId}/indisponibilites/{$indispoId}";
+        $links = [
+            'self' => ['href' => $base],
+            'update' => ['href' => $base, 'meta' => ['method' => 'PUT']],
+            'delete' => ['href' => $base, 'meta' => ['method' => 'DELETE']]
+        ];
+
         return ApiResponseBuilder::create()
             ->status(200)
-            ->data($indispo)
+            ->data(ApiResponseBuilder::resourceFromAttributes('indisponibilites', $attributes, 'id', $links))
+            ->links(['self' => ['href' => $base]])
             ->build($response);
     }
 }

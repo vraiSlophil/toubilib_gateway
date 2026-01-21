@@ -58,10 +58,20 @@ final class CreateIndisponibiliteAction
             $id = $this->serviceIndisponibilite->creerIndisponibilite($input);
             $indispo = $this->serviceIndisponibilite->getById($id);
             $location = "/api/praticiens/{$praticienId}/indisponibilites/{$id}";
+            $links = [
+                'self' => ['href' => $location],
+                'update' => ['href' => $location, 'meta' => ['method' => 'PUT']],
+                'delete' => ['href' => $location, 'meta' => ['method' => 'DELETE']]
+            ];
+            $resource = ApiResponseBuilder::resource('indisponibilites', $id, [], $links);
+            if ($indispo !== null) {
+                $attributes = $indispo->jsonSerialize();
+                $resource = ApiResponseBuilder::resourceFromAttributes('indisponibilites', $attributes, 'id', $links);
+            }
 
             return ApiResponseBuilder::create()
                 ->status(201)
-                ->data($indispo)
+                ->data($resource)
                 ->header('Location', $location)
                 ->links(['self' => ['href' => $location]])
                 ->build($response);

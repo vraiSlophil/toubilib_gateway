@@ -21,13 +21,19 @@ final class GetRdvAction
             return ApiResponseBuilder::create()->status(404)->error('Rdv not found')->build($response);
         }
 
-        $data = $dto->jsonSerialize();
+        $attributes = $dto->jsonSerialize();
+        $praticienId = (string)($attributes['praticienId'] ?? '');
         $links = [
             'self' => ['href' => '/api/rdvs/' . $id],
-            'praticien' => ['href' => '/api/praticiens/' . $data['praticienId']],
-            'cancel' => ['href' => '/api/rdvs/' . $id, 'method' => 'DELETE']
+            'praticien' => ['href' => '/api/praticiens/' . $praticienId],
+            'cancel' => ['href' => '/api/rdvs/' . $id, 'meta' => ['method' => 'DELETE']]
         ];
+        $resource = ApiResponseBuilder::resourceFromAttributes('rdvs', $attributes, 'id', $links);
 
-        return ApiResponseBuilder::create()->status(200)->data($data)->links($links)->build($response);
+        return ApiResponseBuilder::create()
+            ->status(200)
+            ->data($resource)
+            ->links(['self' => ['href' => '/api/rdvs/' . $id]])
+            ->build($response);
     }
 }

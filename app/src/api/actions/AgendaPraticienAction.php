@@ -37,12 +37,15 @@ final class AgendaPraticienAction
 
         $slots = $this->serviceRdv->listCreneauxPris($praticienId, $debut, $fin);
         $data = array_map(static function ($dto) {
-            $item = $dto->jsonSerialize();
-            $item['_links'] = [
-                'rdv' => ['href' => '/api/rdvs/' . $item['rdvId']],
-                'patient' => ['href' => '/api/patients/' . $item['patientId']],
+            $attributes = $dto->jsonSerialize();
+            $rdvId = (string)($attributes['rdvId'] ?? '');
+            $praticienId = (string)($attributes['praticienId'] ?? '');
+            unset($attributes['rdvId']);
+            $links = [
+                'rdv' => ['href' => '/api/rdvs/' . $rdvId],
+                'praticien' => ['href' => '/api/praticiens/' . $praticienId],
             ];
-            return $item;
+            return ApiResponseBuilder::resource('creneaux', $rdvId, $attributes, $links);
         }, $slots);
 
         $links = [
@@ -53,4 +56,3 @@ final class AgendaPraticienAction
         return ApiResponseBuilder::create()->status(200)->data($data)->links($links)->build($response);
     }
 }
-

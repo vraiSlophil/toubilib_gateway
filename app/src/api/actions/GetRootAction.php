@@ -11,13 +11,14 @@ final class GetRootAction
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $links = [
+            'self' => ['href' => '/api'],
             'praticiens' => ['href' => '/api/praticiens'],
-            'rdvs' => ['href' => '/api/rdvs{?praticienId,debut,fin}', 'templated' => true],
+            'rdvs' => ['href' => '/api/rdvs'],
             'patients' => ['href' => '/api/patients']
         ];
         return ApiResponseBuilder::create()
             ->status(200)
-            ->data(['message' => 'API root'])
+            ->data(ApiResponseBuilder::resource('root', 'api', ['message' => 'API root'], ['self' => ['href' => '/api']]))
             ->links($links)
             ->build($response);
     }

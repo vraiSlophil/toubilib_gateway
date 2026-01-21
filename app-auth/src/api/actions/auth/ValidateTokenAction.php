@@ -47,14 +47,19 @@ final class ValidateTokenAction
         // On renvoie le profil décodé: pratique pour les étapes suivantes (gateway middleware)
         return ApiResponseBuilder::create()
             ->status(200)
-            ->data([
-                'valid' => true,
-                'profile' => [
-                    'id' => $upr['id'] ?? null,
-                    'email' => $upr['email'] ?? null,
-                    'role' => $upr['role'] ?? null,
-                ],
-            ])
+            ->data(ApiResponseBuilder::resource(
+                'token-validations',
+                (string)($upr['id'] ?? 'current'),
+                [
+                    'valid' => true,
+                    'profile' => [
+                        'id' => $upr['id'] ?? null,
+                        'email' => $upr['email'] ?? null,
+                        'role' => $upr['role'] ?? null,
+                    ],
+                ]
+            ))
+            ->links(['self' => ['href' => '/api/tokens/validate']])
             ->build($response);
     }
 
@@ -80,4 +85,3 @@ final class ValidateTokenAction
         return trim($token);
     }
 }
-

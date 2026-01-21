@@ -31,11 +31,13 @@ final class ListPatientsAction
         }
 
         $data = array_map(static function ($dto) {
-            $item = $dto->jsonSerialize();
-            $item['_links'] = [
-                'self' => ['href' => '/api/patients/' . $item['id']],
+            $attributes = $dto->jsonSerialize();
+            $id = (string)($attributes['id'] ?? '');
+            unset($attributes['id']);
+            $links = [
+                'self' => ['href' => '/api/patients/' . $id],
             ];
-            return $item;
+            return ApiResponseBuilder::resource('patients', $id, $attributes, $links);
         }, $patients);
 
         return ApiResponseBuilder::create()

@@ -38,12 +38,15 @@ final class ListBookedSlotsAction
 
         $slots = $this->service->listCreneauxPris($praticienId, $start, $end);
         $data = array_map(function ($dto) {
-            $item = $dto->jsonSerialize();
-            $item['_links'] = [
-                'rdv' => ['href' => '/api/rdvs/' . $item['rdvId']],
-                'praticien' => ['href' => '/api/praticiens/' . $item['praticienId']]
+            $attributes = $dto->jsonSerialize();
+            $rdvId = (string)($attributes['rdvId'] ?? '');
+            $praticienId = (string)($attributes['praticienId'] ?? '');
+            unset($attributes['rdvId']);
+            $links = [
+                'rdv' => ['href' => '/api/rdvs/' . $rdvId],
+                'praticien' => ['href' => '/api/praticiens/' . $praticienId]
             ];
-            return $item;
+            return ApiResponseBuilder::resource('creneaux', $rdvId, $attributes, $links);
         }, $slots);
 
         $links = [

@@ -63,7 +63,15 @@ final class CreatePatientAction
         $location = '/api/patients/' . $user->ID;
         return ApiResponseBuilder::create()
             ->status(201)
-            ->data($patient)
+            ->data($patient !== null
+                ? ApiResponseBuilder::resourceFromAttributes(
+                    'patients',
+                    $patient->jsonSerialize(),
+                    'id',
+                    ['self' => ['href' => $location]]
+                )
+                : ApiResponseBuilder::resource('patients', $user->ID, [], ['self' => ['href' => $location]])
+            )
             ->links(['self' => ['href' => $location]])
             ->header('Location', $location)
             ->build($response);

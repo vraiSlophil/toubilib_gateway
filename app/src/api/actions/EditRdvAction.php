@@ -49,9 +49,26 @@ class EditRdvAction
         try {
             $this->serviceRdv->updateRdvStatus($rdvId, $statusBool);
 
+            $rdv = $this->serviceRdv->getRdvById($rdvId);
+            if ($rdv === null) {
+                return ApiResponseBuilder::create()
+                    ->status(404)
+                    ->error('Appointment not found')
+                    ->build($response);
+            }
+
+            $attributes = $rdv->jsonSerialize();
+            $praticienId = (string)($attributes['praticienId'] ?? '');
+            $links = [
+                'self' => ['href' => '/api/rdvs/' . $rdvId],
+                'praticien' => ['href' => '/api/praticiens/' . $praticienId],
+                'cancel' => ['href' => '/api/rdvs/' . $rdvId, 'meta' => ['method' => 'DELETE']]
+            ];
+
             return ApiResponseBuilder::create()
                 ->status(200)
-                ->data(['message' => 'Appointment status updated successfully'])
+                ->data(ApiResponseBuilder::resourceFromAttributes('rdvs', $attributes, 'id', $links))
+                ->links(['self' => ['href' => '/api/rdvs/' . $rdvId]])
                 ->build($response);
         } catch (RdvNotFoundException $e) {
             return ApiResponseBuilder::create()

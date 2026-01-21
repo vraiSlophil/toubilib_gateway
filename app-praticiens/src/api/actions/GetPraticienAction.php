@@ -21,15 +21,17 @@ final class GetPraticienAction
             return ApiResponseBuilder::create()->status(404)->error('Praticien not found')->build($response);
         }
 
-        $data = $dto->jsonSerialize();
+        $attributes = $dto->jsonSerialize();
         $links = [
             'self' => ['href' => '/api/praticiens/' . $id],
-            'rdvs' => [
-                'href' => '/api/praticiens/' . $id . '/rdvs{?debut,fin}',
-                'templated' => true
-            ]
+            'rdvs' => ['href' => '/api/praticiens/' . $id . '/rdvs']
         ];
+        $resource = ApiResponseBuilder::resourceFromAttributes('praticiens', $attributes, 'id', $links);
 
-        return ApiResponseBuilder::create()->status(200)->data($data)->links($links)->build($response);
+        return ApiResponseBuilder::create()
+            ->status(200)
+            ->data($resource)
+            ->links(['self' => ['href' => '/api/praticiens/' . $id]])
+            ->build($response);
     }
 }

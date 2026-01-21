@@ -61,17 +61,27 @@ final class ListRdvsAction
 
         $rdvs = $this->serviceRdv->listRdvsFiltered($user, $debut, $fin, $praticienId, $pastOnly);
 
-        $data = array_map(fn(RendezVousDTO $dto) => $dto->jsonSerialize() + [
-                '_links' => [
-                    'self' => ['href' => '/api/rdvs/' . $dto->id],
-                    'cancel' => ['href' => '/api/rdvs/' . $dto->id, 'method' => 'DELETE']
-                ]
-            ], $rdvs);
+        $data = array_map(static function (RendezVousDTO $dto) {
+            $attributes = $dto->jsonSerialize();
+            $id = (string)($attributes['id'] ?? '');
+            unset($attributes['id']);
+            $links = [
+                'self' => ['href' => '/api/rdvs/' . $id],
+                'cancel' => ['href' => '/api/rdvs/' . $id, 'meta' => ['method' => 'DELETE']]
+            ];
+            return ApiResponseBuilder::resource('rdvs', $id, $attributes, $links);
+        }, $rdvs);
+
+        $self = $request->getUri()->getPath();
+        $query = $request->getUri()->getQuery();
+        if ($query !== '') {
+            $self .= '?' . $query;
+        }
 
         return ApiResponseBuilder::create()
             ->status(200)
             ->data($data)
-            ->links(['self' => ['href' => $request->getUri()->getPath()]])
+            ->links(['self' => ['href' => $self]])
             ->build($response);
     }
 }

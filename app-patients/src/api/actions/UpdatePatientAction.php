@@ -65,7 +65,16 @@ final class UpdatePatientAction
 
         return ApiResponseBuilder::create()
             ->status(200)
-            ->data($patient)
+            ->data($patient !== null
+                ? ApiResponseBuilder::resourceFromAttributes(
+                    'patients',
+                    $patient->jsonSerialize(),
+                    'id',
+                    ['self' => ['href' => '/api/patients/' . $patientId]]
+                )
+                : ApiResponseBuilder::resource('patients', $patientId, [], ['self' => ['href' => '/api/patients/' . $patientId]])
+            )
+            ->links(['self' => ['href' => '/api/patients/' . $patientId]])
             ->build($response);
     }
 }
