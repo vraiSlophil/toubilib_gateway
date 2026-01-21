@@ -1,5 +1,5 @@
 meta {
-  name: GET-list-rdvs
+  name: GET-rdvs
   type: http
   seq: 1
 }
@@ -15,10 +15,6 @@ params:query {
   ~fin: {{agendaEnd}}
   ~praticienId: {{praticienId}}
   ~history: false
-}
-
-headers {
-  ~Authorization: Bearer {{accessToken}}
 }
 
 settings {

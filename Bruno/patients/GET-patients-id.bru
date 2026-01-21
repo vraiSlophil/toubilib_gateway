@@ -1,0 +1,16 @@
+meta {
+  name: GET-patients-id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{API_SRC}}/patients/{{patientId}}
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

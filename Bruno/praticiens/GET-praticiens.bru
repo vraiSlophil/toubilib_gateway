@@ -5,14 +5,14 @@ meta {
 }
 
 get {
-  url: {{API_SRC}}/praticiens?specialiteId=2&ville=nancy
+  url: {{API_SRC}}/praticiens
   body: none
-  auth: inherit
+  auth: none
 }
 
 params:query {
-  specialiteId: 2
-  ville: nancy
+  ~specialiteId: 2
+  ~ville: nancy
 }
 
 settings {

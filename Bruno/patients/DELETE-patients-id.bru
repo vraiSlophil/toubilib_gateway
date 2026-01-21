@@ -1,5 +1,5 @@
 meta {
-  name: DELETE-patient
+  name: DELETE-patients-id
   type: http
   seq: 5
 }
@@ -7,9 +7,10 @@ meta {
 delete {
   url: {{API_SRC}}/patients/{{patientId}}
   body: none
-  auth: none
+  auth: inherit
 }
 
-headers {
-  Authorization: Bearer {{accessToken}}
+settings {
+  encodeUrl: true
+  timeout: 0
 }

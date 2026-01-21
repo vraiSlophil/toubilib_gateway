@@ -1,5 +1,5 @@
 meta {
-  name: POST-signup
+  name: POST-auth-signup
   type: http
   seq: 2
 }
@@ -7,7 +7,7 @@ meta {
 post {
   url: {{API_SRC}}/auth/signup
   body: json
-  auth: inherit
+  auth: none
 }
 
 body:json {

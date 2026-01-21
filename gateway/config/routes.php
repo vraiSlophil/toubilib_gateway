@@ -38,6 +38,8 @@ return function (App $app): void {
             $praticiens->group('/{praticienId}/indisponibilites', function (RouteCollectorProxyInterface $indisponibilites) {
                 $indisponibilites->get('', ProxyAction::class);
                 $indisponibilites->post('', ProxyAction::class);
+                $indisponibilites->get('/{indispoId}', ProxyAction::class);
+                $indisponibilites->put('/{indispoId}', ProxyAction::class);
                 $indisponibilites->delete('/{indispoId}', ProxyAction::class);
             });
         })->add(new UuidParamMiddleware(['praticienId', 'indispoId']));

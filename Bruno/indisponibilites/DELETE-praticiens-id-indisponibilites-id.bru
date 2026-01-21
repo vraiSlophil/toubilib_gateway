@@ -1,5 +1,5 @@
 meta {
-  name: DELETE-indisponibilite
+  name: DELETE-praticiens-id-indisponibilites-id
   type: http
   seq: 5
 }
@@ -7,11 +7,7 @@ meta {
 delete {
   url: {{API_SRC}}/praticiens/{{praticienId}}/indisponibilites/{{indispoId}}
   body: none
-  auth: none
-}
-
-headers {
-  Authorization: Bearer {{accessToken}}
+  auth: inherit
 }
 
 vars:pre-request {

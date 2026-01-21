@@ -2,41 +2,27 @@
 
 namespace toubilib\api\providers\auth;
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Throwable;
+
 final class JwtPayloadDecoder
 {
     public function decode(string $token): ?array
     {
-        $parts = explode('.', $token);
-        if (count($parts) !== 3) {
+        $secret = getenv('JWT_SECRET') ?: ($_ENV['JWT_SECRET'] ?? '');
+        $algo = getenv('JWT_ALGORITHM') ?: ($_ENV['JWT_ALGORITHM'] ?? 'HS256');
+        if ($secret === '') {
             return null;
         }
 
-        $payloadJson = $this->base64UrlDecode($parts[1]);
-        if ($payloadJson === null) {
+        try {
+            $decoded = JWT::decode($token, new Key($secret, $algo));
+        } catch (Throwable) {
             return null;
         }
 
-        $payload = json_decode($payloadJson, true);
-        if (!is_array($payload)) {
-            return null;
-        }
-
-        return $payload;
-    }
-
-    private function base64UrlDecode(string $data): ?string
-    {
-        $data = strtr($data, '-_', '+/');
-        $padding = strlen($data) % 4;
-        if ($padding > 0) {
-            $data .= str_repeat('=', 4 - $padding);
-        }
-
-        $decoded = base64_decode($data, true);
-        if ($decoded === false) {
-            return null;
-        }
-
-        return $decoded;
+        $payload = json_decode(json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), true);
+        return is_array($payload) ? $payload : null;
     }
 }

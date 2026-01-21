@@ -1,5 +1,5 @@
 meta {
-  name: POST-signin
+  name: POST-auth-signin
   type: http
   seq: 1
 }
@@ -7,7 +7,7 @@ meta {
 post {
   url: {{API_SRC}}/auth/signin
   body: json
-  auth: inherit
+  auth: none
 }
 
 body:json {

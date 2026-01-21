@@ -1,0 +1,24 @@
+meta {
+  name: PUT-praticiens-id-indisponibilites-id
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{API_SRC}}/praticiens/{{praticienId}}/indisponibilites/{{indispoId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "debut": "2025-12-21T09:00:00Z",
+    "fin": "2025-12-28T18:00:00Z",
+    "motif": "Congés de Noël (modifié)"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

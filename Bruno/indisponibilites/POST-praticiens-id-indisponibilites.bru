@@ -1,5 +1,5 @@
 meta {
-  name: POST-create-indisponibilite
+  name: POST-praticiens-id-indisponibilites
   type: http
   seq: 1
 }
@@ -7,11 +7,7 @@ meta {
 post {
   url: {{API_SRC}}/praticiens/{{praticienId}}/indisponibilites
   body: json
-  auth: none
-}
-
-headers {
-  Authorization: Bearer {{accessToken}}
+  auth: inherit
 }
 
 body:json {

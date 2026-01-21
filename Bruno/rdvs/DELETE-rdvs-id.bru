@@ -1,17 +1,13 @@
 meta {
-  name: GET-rdv
+  name: DELETE-rdvs-id
   type: http
-  seq: 2
+  seq: 4
 }
 
-get {
+delete {
   url: {{API_SRC}}/rdvs/{{rdvId}}
   body: none
   auth: inherit
-}
-
-headers {
-  ~Authorization: Bearer {{accessToken}}
 }
 
 settings {

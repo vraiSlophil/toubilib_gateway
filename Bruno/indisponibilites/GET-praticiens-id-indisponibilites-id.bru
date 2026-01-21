@@ -1,5 +1,5 @@
 meta {
-  name: GET-indisponibilite
+  name: GET-praticiens-id-indisponibilites-id
   type: http
   seq: 3
 }
@@ -7,9 +7,10 @@ meta {
 get {
   url: {{API_SRC}}/praticiens/{{praticienId}}/indisponibilites/{{indispoId}}
   body: none
-  auth: none
+  auth: inherit
 }
 
-headers {
-  Authorization: Bearer {{accessToken}}
+settings {
+  encodeUrl: true
+  timeout: 0
 }

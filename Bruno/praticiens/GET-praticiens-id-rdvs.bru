@@ -1,11 +1,11 @@
 meta {
-  name: GET-praticien-rdvs
+  name: GET-praticiens-id-rdvs
   type: http
   seq: 3
 }
 
 get {
-  url: {{API_SRC}}/praticiens/{{praticienId}}/rdvs?debut={{agendaStart}}&fin={{agendaEnd}}
+  url: {{API_SRC}}/praticiens/{{praticienId}}/rdvs
   body: none
   auth: inherit
 }
@@ -13,10 +13,6 @@ get {
 params:query {
   debut: {{agendaStart}}
   fin: {{agendaEnd}}
-}
-
-headers {
-  ~Authorization: Bearer {{accessToken}}
 }
 
 settings {

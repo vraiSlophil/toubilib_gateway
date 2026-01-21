@@ -1,5 +1,5 @@
 meta {
-  name: POST-rdv
+  name: POST-rdvs
   type: http
   seq: 3
 }
@@ -8,10 +8,6 @@ post {
   url: {{API_SRC}}/rdvs
   body: json
   auth: inherit
-}
-
-headers {
-  ~Authorization: Bearer {{accessToken}}
 }
 
 body:json {

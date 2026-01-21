@@ -1,5 +1,5 @@
 meta {
-  name: POST-refresh
+  name: POST-auth-refresh
   type: http
   seq: 3
 }
@@ -7,7 +7,7 @@ meta {
 post {
   url: {{API_SRC}}/auth/refresh
   body: json
-  auth: inherit
+  auth: none
 }
 
 body:json {
@@ -31,4 +31,3 @@ settings {
   encodeUrl: true
   timeout: 0
 }
-

@@ -1,0 +1,29 @@
+meta {
+  name: POST-patients
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{API_SRC}}/patients
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nom": "Dupont",
+    "prenom": "Marie",
+    "dateNaissance": "1990-06-12",
+    "adresse": "12 rue de la Paix",
+    "codePostal": "54000",
+    "ville": "Nancy",
+    "telephone": "0611223344",
+    "email": "{{patientEmail}}"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
