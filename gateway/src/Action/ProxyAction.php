@@ -18,6 +18,7 @@ final class ProxyAction
 {
     private Client $client;
     private Client $praticiensClient;
+    private Client $patientsClient;
     private Client $rdvClient;
     private Client $authClient;
 
@@ -25,6 +26,7 @@ final class ProxyAction
     {
         $this->client = $container->get('client.api');
         $this->praticiensClient = $container->get('client.praticiens');
+        $this->patientsClient = $container->get('client.patients');
         $this->rdvClient = $container->get('client.rdv');
         $this->authClient = $container->get('client.auth');
     }
@@ -42,6 +44,9 @@ final class ProxyAction
                 break;
             case str_starts_with($path, 'api/praticiens'):
                 $targetClient = $this->praticiensClient;
+                break;
+            case str_starts_with($path, 'api/patients'):
+                $targetClient = $this->patientsClient;
                 break;
             case str_starts_with($path, 'api/rdvs'):
                 $targetClient = $this->rdvClient;

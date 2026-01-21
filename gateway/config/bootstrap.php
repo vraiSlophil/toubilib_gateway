@@ -22,6 +22,16 @@ $builder->addDefinitions([
         ]);
     },
 
+    // Client microservice patients
+    'client.patients' => function (ContainerInterface $c) {
+        $baseUri = getenv('PATIENTS_API_BASE_URI') ?: 'http://api.patients:80/api/';
+        return new Client([
+            'base_uri' => rtrim($baseUri, '/') . '/',
+            'http_errors' => false,
+            'timeout' => 10.0,
+        ]);
+    },
+
     // Client microservice authentification
     'client.auth' => function (ContainerInterface $c) {
         $baseUri = getenv('AUTH_API_BASE_URI') ?: 'http://api.auth:80/api/';

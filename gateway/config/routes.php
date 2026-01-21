@@ -42,6 +42,20 @@ return function (App $app): void {
             });
         })->add(new UuidParamMiddleware(['praticienId', 'indispoId']));
 
+        // Microservice patients
+        $group->group('/patients', function (RouteCollectorProxyInterface $patients) {
+            $patients->get('', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
+            $patients->post('', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
+            $patients->get('/{patientId}', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
+            $patients->put('/{patientId}', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
+            $patients->delete('/{patientId}', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
+        })->add(new UuidParamMiddleware(['patientId']));
+
         // Reste (API monolitique)
         $group->any('[/{rest:.*}]', ProxyAction::class);
     });
