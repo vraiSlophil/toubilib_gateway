@@ -1,6 +1,7 @@
 <?php
 
 use GuzzleHttp\Client;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
 use toubilib\infra\adapters\MonologLogger;
 
@@ -57,6 +58,16 @@ return [
             'http_errors' => false,
             'timeout' => 10.0,
         ]);
+    },
+
+    'rabbitmq.mailer' => static function () {
+        $host = $_ENV['RABBITMQ_MAILER_HOST'];
+        $port = (int)$_ENV['RABBITMQ_MAILER_PORT'];
+        $user = $_ENV['RABBITMQ_MAILER_USER'];
+        $pass = $_ENV['RABBITMQ_MAILER_PASS'];
+        $vhost = $_ENV['RABBITMQ_MAILER_VHOST'];
+
+        return new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
     },
 
     MonologLoggerInterface::class => static function ($c) {

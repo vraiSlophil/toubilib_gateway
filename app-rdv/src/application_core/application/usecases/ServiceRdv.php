@@ -3,18 +3,20 @@
 namespace toubilib\core\application\usecases;
 
 use DateTimeImmutable;
+use DI\NotFoundException;
 use toubilib\core\application\ports\api\dtos\inputs\InputRendezVousDTO;
 use toubilib\core\application\ports\api\dtos\outputs\CreneauDTO;
 use toubilib\core\application\ports\api\dtos\outputs\RendezVousDTO;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
+use toubilib\core\application\ports\spi\event\EventPublisherInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PatientRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PraticienRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
+use toubilib\core\domain\entities\MailRdv;
 use toubilib\core\domain\entities\Rdv;
 use toubilib\core\domain\exceptions\RdvNotFoundException;
 use toubilib\core\domain\exceptions\PraticienNotFoundException;
-use toubilib\core\domain\exceptions\InvalidMotifException;
 use toubilib\core\domain\exceptions\SlotConflictException;
 use toubilib\core\domain\exceptions\PraticienUnavailableException;
 use toubilib\core\application\ports\api\dtos\outputs\ProfileDTO;
@@ -74,21 +76,16 @@ final class ServiceRdv implements ServiceRdvInterface
             throw new PraticienUnavailableException('Praticien unavailable');
         }
 
+        $patient = $this->patientRepository->getById($input->patientId);
+        if ($patient === null) {
+            throw new NotFoundException('Patient not found after creating rdv');
+        }
+
         $rdv = Rdv::fromInputDTO($input);
         $this->rdvRepository->create($rdv);
 
-        $praticien = $this->praticienRepository->getById($input->praticienId);
-        if ($praticien === null) {
-            throw new PraticienNotFoundException('Praticien not found after creating rdv');
-        }
-
-        $patient = $this->patientRepository->getById($input->patientId);
-        if ($patient === null) {
-            throw new PraticienNotFoundException('Patient not found after creating rdv');
-        }
-
         $mailRdv = new MailRdv(
-            'rdv_created',
+            'rdv.created',
             $rdv,
             [$praticien, $patient]
         );

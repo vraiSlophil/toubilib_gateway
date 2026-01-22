@@ -19,14 +19,19 @@ use toubilib\core\domain\entities\Structure;
  */
 final class HttpPraticienRepository implements PraticienRepositoryInterface
 {
-    public function __construct(private Client $client)
+    public function __construct(
+        private Client $client,
+        private ?AuthHeaderProvider $authHeaderProvider = null
+    )
     {
     }
 
     /** @return Praticien[] */
     public function getAllPraticiens(): array
     {
-        $resp = $this->client->get('praticiens');
+        $resp = $this->client->get('praticiens', [
+            'headers' => $this->authHeaders(),
+        ]);
         $data = json_decode((string) $resp->getBody(), true);
         $items = $data['data'] ?? [];
 
@@ -42,7 +47,9 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
 
     public function getById(string $id): ?PraticienDetail
     {
-        $resp = $this->client->get('praticiens/' . rawurlencode($id));
+        $resp = $this->client->get('praticiens/' . rawurlencode($id), [
+            'headers' => $this->authHeaders(),
+        ]);
         if ($resp->getStatusCode() === 404) {
             return null;
         }
@@ -67,7 +74,10 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
             $query['ville'] = $ville;
         }
 
-        $resp = $this->client->get('praticiens', ['query' => $query]);
+        $resp = $this->client->get('praticiens', [
+            'query' => $query,
+            'headers' => $this->authHeaders(),
+        ]);
         $data = json_decode((string) $resp->getBody(), true);
         $items = $data['data'] ?? [];
 
@@ -84,6 +94,7 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
     public function create(Praticien $praticien): void
     {
         $this->client->post('praticiens', [
+            'headers' => $this->authHeaders(),
             'json' => $this->praticienPayload($praticien),
         ]);
     }
@@ -91,13 +102,16 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
     public function update(Praticien $praticien): void
     {
         $this->client->put('praticiens/' . rawurlencode($praticien->getId()), [
+            'headers' => $this->authHeaders(),
             'json' => $this->praticienPayload($praticien),
         ]);
     }
 
     public function delete(string $id): void
     {
-        $this->client->delete('praticiens/' . rawurlencode($id));
+        $this->client->delete('praticiens/' . rawurlencode($id), [
+            'headers' => $this->authHeaders(),
+        ]);
     }
 
     private function hydratePraticien(array $resource): ?Praticien
@@ -243,5 +257,15 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
             'accepteNouveauPatient' => $praticien->isAccepteNouveauPatient(),
             'estOrganisation' => $praticien->isEstOrganisation(),
         ];
+    }
+
+    private function authHeaders(): array
+    {
+        $authorization = $this->authHeaderProvider?->getAuthorization();
+        if ($authorization === null || $authorization === '') {
+            return [];
+        }
+
+        return ['Authorization' => $authorization];
     }
 }

@@ -14,7 +14,8 @@ use toubilib\core\application\usecases\ServiceIndisponibilite;
 use toubilib\infra\repositories\PDORdvRepository;
 use toubilib\infra\repositories\PDOIndisponibiliteRepository;
 use toubilib\infra\adapters\MonologLogger;
-use GuzzleHttp\Client;
+use toubilib\infra\adapters\AuthHeaderProvider;
+use toubilib\infra\adapters\AmqpEventPublisher;
 use toubilib\infra\adapters\HttpPraticienRepository;
 use toubilib\infra\adapters\HttpPatientRepository;
 
@@ -22,6 +23,10 @@ return [
     // --- Services ---
     MonologLoggerInterface::class => static function ($c) {
         return new MonologLogger($c);
+    },
+
+    AuthHeaderProvider::class => static function () {
+        return new AuthHeaderProvider();
     },
 
     ServicePraticienInterface::class => static function ($c) {
@@ -55,7 +60,8 @@ return [
     // --- Repositories ---
     PraticienRepositoryInterface::class => static function ($c) {
         return new HttpPraticienRepository(
-            $c->get('client.praticiens')
+            $c->get('client.praticiens'),
+            $c->get(AuthHeaderProvider::class)
         );
     },
 
@@ -73,15 +79,19 @@ return [
 
     PatientRepositoryInterface::class => static function ($c) {
         return new HttpPatientRepository(
-            $c->get('client.patients')
+            $c->get('client.patients'),
+            $c->get(AuthHeaderProvider::class)
         );
     },
 
     AmqpEventPublisher::class => static function ($c) {
         $connection = $c->get('rabbitmq.mailer');
         $exchange = $_ENV['RABBITMQ_EXCHANGE'];
-        $routingKey = $_ENV['RABBITMQ_ROUTING_KEY'];
+        $routingKeys = [
+            'rdv.created' => $_ENV['RABBITMQ_ROUTING_KEY_MAIL_CREATED'],
+            'rdv.cancelled' => $_ENV['RABBITMQ_ROUTING_KEY_MAIL_CANCELLED'],
+        ];
 
-        return new AmqpEventPublisher($connection, $exchange, $routingKey);
+        return new AmqpEventPublisher($connection, $exchange, $routingKeys);
     },
 ];

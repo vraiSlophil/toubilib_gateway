@@ -23,7 +23,7 @@ script:post-response {
   bru.setEnvVar("accessToken",body.data.attributes.accessToken);
   bru.setEnvVar("refreshToken",body.data.attributes.refreshToken);
   if (body.data.attributes.profile?.id) {
-    bru.setEnvVar("profileId", body.data.attributes.profile.id);
+    bru.setEnvVar("profileId", body.data.id);
   }
 }
 

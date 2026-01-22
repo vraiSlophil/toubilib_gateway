@@ -58,16 +58,6 @@ return [
         ]);
     },
 
-    'rabbitmq.mailer' => static function () {
-        $host = $_ENV['RABBITMQ_MAILER_HOST'];
-        $port = (int)$_ENV['RABBITMQ_MAILER_PORT'];
-        $user = $_ENV['RABBITMQ_MAILER_USER'];
-        $pass = $_ENV['RABBITMQ_MAILER_PASS'];
-        $vhost = $_ENV['RABBITMQ_MAILER_VHOST'];
-
-        return new AMQPStreamConnection($host, $port, $user, $pass, $vhost);
-    },
-
     MonologLoggerInterface::class => static function ($c) {
         return new MonologLogger($c);
     },

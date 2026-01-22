@@ -76,12 +76,6 @@ final class ProxyAction
         $status = $apiResponse->getStatusCode();
         $apiBody = (string) $apiResponse->getBody();
 
-        if ($status === 404) {
-            return $this->json($response->withStatus(404), [
-                'error' => ['message' => 'Resource not found'],
-            ]);
-        }
-
         $decoded = json_decode($apiBody, true);
         if (json_last_error() === JSON_ERROR_NONE) {
             return $this->jsonRaw($response->withStatus($status), $apiBody);

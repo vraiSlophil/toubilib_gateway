@@ -15,14 +15,19 @@ use toubilib\core\domain\entities\Patient;
  */
 final class HttpPatientRepository implements PatientRepositoryInterface
 {
-    public function __construct(private Client $client)
+    public function __construct(
+        private Client $client,
+        private ?AuthHeaderProvider $authHeaderProvider = null
+    )
     {
     }
 
     /** @return Patient[] */
     public function listPatients(): array
     {
-        $resp = $this->client->get('patients');
+        $resp = $this->client->get('patients', [
+            'headers' => $this->authHeaders(),
+        ]);
         $data = json_decode((string) $resp->getBody(), true);
         $items = $data['data'] ?? [];
 
@@ -38,7 +43,9 @@ final class HttpPatientRepository implements PatientRepositoryInterface
 
     public function getById(string $id): ?Patient
     {
-        $resp = $this->client->get('patients/' . rawurlencode($id));
+        $resp = $this->client->get('patients/' . rawurlencode($id), [
+            'headers' => $this->authHeaders(),
+        ]);
         if ($resp->getStatusCode() === 404) {
             return null;
         }
@@ -55,6 +62,7 @@ final class HttpPatientRepository implements PatientRepositoryInterface
     public function create(Patient $patient): void
     {
         $this->client->post('patients', [
+            'headers' => $this->authHeaders(),
             'json' => $this->patientPayload($patient),
         ]);
     }
@@ -62,13 +70,16 @@ final class HttpPatientRepository implements PatientRepositoryInterface
     public function update(Patient $patient): void
     {
         $this->client->put('patients/' . rawurlencode($patient->getId()), [
+            'headers' => $this->authHeaders(),
             'json' => $this->patientPayload($patient),
         ]);
     }
 
     public function delete(string $id): void
     {
-        $this->client->delete('patients/' . rawurlencode($id));
+        $this->client->delete('patients/' . rawurlencode($id), [
+            'headers' => $this->authHeaders(),
+        ]);
     }
 
     public function findById(string $id): ?Patient
@@ -128,5 +139,15 @@ final class HttpPatientRepository implements PatientRepositoryInterface
             'email' => $patient->getEmail(),
             'telephone' => $patient->getTelephone(),
         ];
+    }
+
+    private function authHeaders(): array
+    {
+        $authorization = $this->authHeaderProvider?->getAuthorization();
+        if ($authorization === null || $authorization === '') {
+            return [];
+        }
+
+        return ['Authorization' => $authorization];
     }
 }

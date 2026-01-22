@@ -71,7 +71,7 @@ $errorMw->setDefaultErrorHandler(
             $status = 500;
         }
 
-        if ($logErrors && $status <= 500) {
+        if ($logErrors && $status >= 500) {
             $uri = (string) $request->getUri();
             $line = sprintf(
                 '[%s] %s %s %d %s (%s)',

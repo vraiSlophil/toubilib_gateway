@@ -1,26 +1,27 @@
 <?php
 
-namespace toubilib\core\domain\entities
+namespace toubilib\core\domain\entities;
 
-final class MailRdv
+use JsonSerializable;
+use InvalidArgumentException;
+
+final class MailRdv implements JsonSerializable
 {
-    use JsonSerializableTrait;
 
     private string $eventType;
     private Rdv $rdv;
+    /** @var string[] */
     private array $recipients;
 
     public function __construct(string $eventType, Rdv $rdv, array $recipients)
     {
         $this->eventType = $eventType;
         $this->rdv = $rdv;
-        if (!is_array($recipients) || empty($recipients)) {
-            throw new InvalidArgumentException('Recipients must be a non-empty array of email addresses.');
+        $normalized = $this->normalizeRecipients($recipients);
+        if ($normalized === []) {
+            throw new InvalidArgumentException('Recipients must be a non-empty array of valid email addresses.');
         }
-        if (!isValidRecipient($recipients)) {
-            throw new InvalidArgumentException('One or more recipients are invalid.');
-        }
-        $this->recipients = $recipients;
+        $this->recipients = $normalized;
     }
 
     public function getEventType(): string
@@ -38,29 +39,54 @@ final class MailRdv
         return $this->recipients;
     }
 
-    public function addRecipient(string $$recipient): void
+    public function addRecipient(string $recipient): void
     {
-        if (!isValidRecipient($recipient)) {
+        if (!$this->isValidRecipient($recipient)) {
             throw new InvalidArgumentException('Invalid recipient provided.');
         }
         $this->recipients[] = $recipient;
     }
 
-    private function isValidRecipient(object $recipient): bool
+    private function isValidRecipient(string $recipient): bool
     {
-        return !($recipient instanceof Patient
-            && filter_var($recipient->getEmail(), FILTER_VALIDATE_EMAIL) !== false
-            && $recipient instanceof Patient
-            && filter_var($recipient->getEmail(), FILTER_VALIDATE_EMAIL) !== false);
+        $value = trim($recipient);
+        return $value !== '' && filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
 
     public function toArray(): array
     {
         return [
             'event_type' => $this->eventType,
-            'rdv' => $this->rdv->toArray(),
+            'rdv' => $this->rdv,
             'recipients' => $this->recipients,
         ];
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this->toArray();
+    }
+
+    /** @return string[] */
+    private function normalizeRecipients(array $recipients): array
+    {
+        $normalized = [];
+        foreach ($recipients as $recipient) {
+            $email = null;
+            if (is_string($recipient)) {
+                $email = $recipient;
+            } elseif (is_object($recipient) && method_exists($recipient, 'getEmail')) {
+                $email = $recipient->getEmail();
+            }
+
+            if (!is_string($email) || !$this->isValidRecipient($email)) {
+                continue;
+            }
+
+            $normalized[] = $email;
+        }
+
+        return array_values(array_unique($normalized));
     }
 
 }

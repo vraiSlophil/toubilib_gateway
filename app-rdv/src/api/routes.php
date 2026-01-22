@@ -11,6 +11,7 @@ use toubilib\api\actions\CancelRdvAction;
 use toubilib\api\actions\ListRdvsAction;
 use toubilib\api\middlewares\AuthzMiddleware;
 use toubilib\core\application\usecases\AuthzService;
+use toubilib\infra\adapters\AuthHeaderProvider;
 
 return function (App $app): App {
     $app->group('/api', function (RouteCollectorProxy $app) {
@@ -20,15 +21,15 @@ return function (App $app): App {
             $c = $app->getContainer();
 
             $app->get('', ListRdvsAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'listRdvs'));
+                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'listRdvs', null, $c->get(AuthHeaderProvider::class)));
             $app->get('/{rdvId}', GetRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'viewRdv'));
+                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'viewRdv', null, $c->get(AuthHeaderProvider::class)));
             $app->patch('/{rdvId}', EditRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'editRdv'));
+                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'editRdv', null, $c->get(AuthHeaderProvider::class)));
             $app->post('', CreateRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'createRdv'));
+                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'createRdv', null, $c->get(AuthHeaderProvider::class)));
             $app->delete('/{rdvId}', CancelRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'cancelRdv'));
+                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'cancelRdv', null, $c->get(AuthHeaderProvider::class)));
         });
     });
 
