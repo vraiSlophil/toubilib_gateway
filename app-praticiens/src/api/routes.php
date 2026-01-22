@@ -7,6 +7,9 @@ use toubilib\api\actions\GetRootAction;
 use toubilib\api\actions\GetPraticienAction;
 use toubilib\api\actions\ListBookedSlotsAction;
 use toubilib\api\actions\ListPraticiensAction;
+use toubilib\api\actions\CreatePraticienAction;
+use toubilib\api\actions\UpdatePraticienAction;
+use toubilib\api\actions\DeletePraticienAction;
 use toubilib\api\actions\CreateIndisponibiliteAction;
 use toubilib\api\actions\ListIndisponibilitesAction;
 use toubilib\api\actions\DeleteIndisponibiliteAction;
@@ -21,8 +24,11 @@ return function (App $app): App {
 
         $app->group('/praticiens', function (RouteCollectorProxy $app) {
             $app->get('', ListPraticiensAction::class);
+            $app->post('', CreatePraticienAction::class);
             $app->group('/{praticienId}', function (RouteCollectorProxy $app) {
                 $app->get('', GetPraticienAction::class);
+                $app->put('', UpdatePraticienAction::class);
+                $app->delete('', DeletePraticienAction::class);
                 $app->get('/rdvs', ListBookedSlotsAction::class)
                     ->add(new AuthzMiddleware($app->getContainer()->get(AuthzService::class), 'viewAgenda'));
 

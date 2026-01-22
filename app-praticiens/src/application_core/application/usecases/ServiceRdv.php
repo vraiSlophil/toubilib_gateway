@@ -50,7 +50,7 @@ final class ServiceRdv implements ServiceRdvInterface
 
     public function creerRdv(InputRendezVousDTO $input): string
     {
-        $praticien = $this->praticienRepository->findDetailById($input->praticienId);
+        $praticien = $this->praticienRepository->getById($input->praticienId);
         if ($praticien === null) {
             throw new PraticienNotFoundException('Praticien not found');
         }

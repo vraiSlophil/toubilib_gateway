@@ -59,7 +59,7 @@ final class PDOPraticienRepository implements PraticienRepositoryInterface
         return $praticiens;
     }
 
-    public function findDetailById(string $id): ?PraticienDetail
+    public function getById(string $id): ?PraticienDetail
     {
         $sql = 'SELECT p.*, s.id AS specialite_id, s.libelle AS specialite_libelle, s.description AS specialite_description,
                        st.id AS structure_id, st.nom AS structure_nom, st.adresse AS structure_adresse,

@@ -31,7 +31,13 @@ return function (App $app): void {
         // Microservice praticiens
         $group->group('/praticiens', function (RouteCollectorProxyInterface $praticiens) {
             $praticiens->get('', ProxyAction::class);
+            $praticiens->post('', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
             $praticiens->get('/{praticienId}', ProxyAction::class);
+            $praticiens->put('/{praticienId}', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
+            $praticiens->delete('/{praticienId}', ProxyAction::class)
+                ->add(AuthGatewayMiddleware::class);
             $praticiens->get('/{praticienId}/rdvs', ProxyAction::class)
                 ->add(AuthGatewayMiddleware::class);
 

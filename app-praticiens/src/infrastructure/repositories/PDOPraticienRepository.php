@@ -59,7 +59,7 @@ final class PDOPraticienRepository implements PraticienRepositoryInterface
         return $praticiens;
     }
 
-    public function findDetailById(string $id): ?PraticienDetail
+    public function getById(string $id): ?PraticienDetail
     {
         $sql = 'SELECT p.*, s.id AS specialite_id, s.libelle AS specialite_libelle, s.description AS specialite_description,
                        st.id AS structure_id, st.nom AS structure_nom, st.adresse AS structure_adresse,
@@ -187,5 +187,70 @@ final class PDOPraticienRepository implements PraticienRepositoryInterface
                 )
             );
         }, $rows);
+    }
+
+    public function create(Praticien $praticien): void
+    {
+        $sql = '
+            INSERT INTO praticien (
+                id, nom, prenom, ville, email, telephone,
+                specialite_id, structure_id, rpps_id, organisation, nouveau_patient, titre
+            ) VALUES (
+                :id, :nom, :prenom, :ville, :email, :telephone,
+                :specialite_id, NULL, :rpps_id, CAST(:organisation AS bit(1)), CAST(:nouveau_patient AS bit(1)), :titre
+            )';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id' => $praticien->getId(),
+            ':nom' => $praticien->getNom(),
+            ':prenom' => $praticien->getPrenom(),
+            ':ville' => $praticien->getVille(),
+            ':email' => $praticien->getEmail(),
+            ':telephone' => $praticien->getTelephone(),
+            ':specialite_id' => $praticien->getSpecialite()->getId(),
+            ':rpps_id' => $praticien->getRppsId() !== '' ? $praticien->getRppsId() : null,
+            ':organisation' => $praticien->isEstOrganisation() ? '1' : '0',
+            ':nouveau_patient' => $praticien->isAccepteNouveauPatient() ? '1' : '0',
+            ':titre' => $praticien->getTitre(),
+        ]);
+    }
+
+    public function update(Praticien $praticien): void
+    {
+        $sql = '
+            UPDATE praticien SET
+                nom = :nom,
+                prenom = :prenom,
+                ville = :ville,
+                email = :email,
+                telephone = :telephone,
+                specialite_id = :specialite_id,
+                rpps_id = :rpps_id,
+                organisation = CAST(:organisation AS bit(1)),
+                nouveau_patient = CAST(:nouveau_patient AS bit(1)),
+                titre = :titre
+            WHERE id = :id';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':id' => $praticien->getId(),
+            ':nom' => $praticien->getNom(),
+            ':prenom' => $praticien->getPrenom(),
+            ':ville' => $praticien->getVille(),
+            ':email' => $praticien->getEmail(),
+            ':telephone' => $praticien->getTelephone(),
+            ':specialite_id' => $praticien->getSpecialite()->getId(),
+            ':rpps_id' => $praticien->getRppsId() !== '' ? $praticien->getRppsId() : null,
+            ':organisation' => $praticien->isEstOrganisation() ? '1' : '0',
+            ':nouveau_patient' => $praticien->isAccepteNouveauPatient() ? '1' : '0',
+            ':titre' => $praticien->getTitre(),
+        ]);
+    }
+
+    public function delete(string $id): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM praticien WHERE id = :id');
+        $stmt->execute([':id' => $id]);
     }
 }

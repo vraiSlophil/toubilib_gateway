@@ -18,7 +18,7 @@ services:
       - toubilib.net
     depends_on:
       - api.toubilib
-    env_file: ./app/config/.env
+    env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
     
   # service api.toubilib : api pour la prise de rdv
@@ -36,7 +36,7 @@ services:
       - toubiauth.db
       - toubirdv.db
       - toubipat.db
-    env_file: ./app/config/.env
+    env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service microservice praticiens
@@ -51,7 +51,7 @@ services:
       - toubilib.net
     depends_on:
       - toubiprati.db
-    env_file: ./app/config/.env
+    env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service microservice patients
@@ -66,7 +66,7 @@ services:
       - toubilib.net
     depends_on:
       - toubipat.db
-    env_file: ./app/config/.env
+    env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service microservice rendez-vous
@@ -83,7 +83,7 @@ services:
       - toubirdv.db
       - api.praticiens
       - rabbitmq
-    env_file: ./app/config/.env
+    env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service microservice authentification
@@ -98,7 +98,7 @@ services:
       - toubilib.net
     depends_on:
       - toubiauth.db
-    env_file: ./app/config/.env
+    env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service microservice envoi de mails (placeholder)
@@ -113,7 +113,7 @@ services:
       - toubilib.net
     depends_on:
       - rabbitmq
-    env_file: ./app/config/.env
+    env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service RabbitMQ
@@ -138,7 +138,7 @@ services:
   toubiprati.db:
     image: 'postgres:latest'
     env_file:
-      - ./app/config/.env
+      - ./.env
     environment:
       POSTGRES_USER: ${PRAT_USERNAME:-toubiprat}
       POSTGRES_PASSWORD: ${PRAT_PASSWORD:-toubiprat}
@@ -153,7 +153,7 @@ services:
   toubiauth.db:
     image: 'postgres:latest'
     env_file:
-      - ./app/config/.env
+      - ./.env
     environment:
       POSTGRES_USER: ${AUTH_USERNAME:-toubiauth}
       POSTGRES_PASSWORD: ${AUTH_PASSWORD:-toubiauth}
@@ -168,7 +168,7 @@ services:
   toubirdv.db:
     image: 'postgres:latest'
     env_file:
-      - ./app/config/.env
+      - ./.env
     environment:
       POSTGRES_USER: ${RDV_USERNAME:-toubirdv}
       POSTGRES_PASSWORD: ${RDV_PASSWORD:-toubirdv}
@@ -183,7 +183,7 @@ services:
   toubipat.db:
     image: 'postgres:latest'
     env_file:
-      - ./app/config/.env
+      - ./.env
     environment:
       POSTGRES_USER: ${PAT_USERNAME:-toubipat}
       POSTGRES_PASSWORD: ${PAT_PASSWORD:-toubipat}

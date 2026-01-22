@@ -2,6 +2,9 @@
 
 use toubilib\api\actions\GetPraticienAction;
 use toubilib\api\actions\ListPraticiensAction;
+use toubilib\api\actions\CreatePraticienAction;
+use toubilib\api\actions\UpdatePraticienAction;
+use toubilib\api\actions\DeletePraticienAction;
 use toubilib\api\actions\ListBookedSlotsAction;
 use toubilib\api\actions\CreateIndisponibiliteAction;
 use toubilib\api\actions\ListIndisponibilitesAction;
@@ -21,6 +24,24 @@ return [
 
     GetPraticienAction::class => static function ($c) {
         return new GetPraticienAction(
+            $c->get(ServicePraticienInterface::class)
+        );
+    },
+
+    CreatePraticienAction::class => static function ($c) {
+        return new CreatePraticienAction(
+            $c->get(ServicePraticienInterface::class)
+        );
+    },
+
+    UpdatePraticienAction::class => static function ($c) {
+        return new UpdatePraticienAction(
+            $c->get(ServicePraticienInterface::class)
+        );
+    },
+
+    DeletePraticienAction::class => static function ($c) {
+        return new DeletePraticienAction(
             $c->get(ServicePraticienInterface::class)
         );
     },
