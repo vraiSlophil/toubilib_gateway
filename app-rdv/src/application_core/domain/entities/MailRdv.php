@@ -4,6 +4,8 @@ namespace toubilib\core\domain\entities
 
 final class MailRdv
 {
+    use JsonSerializableTrait;
+
     private string $eventType;
     private Rdv $rdv;
     private array $recipients;
@@ -50,6 +52,15 @@ final class MailRdv
             && filter_var($recipient->getEmail(), FILTER_VALIDATE_EMAIL) !== false
             && $recipient instanceof Patient
             && filter_var($recipient->getEmail(), FILTER_VALIDATE_EMAIL) !== false);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'event_type' => $this->eventType,
+            'rdv' => $this->rdv->toArray(),
+            'recipients' => $this->recipients,
+        ];
     }
 
 }

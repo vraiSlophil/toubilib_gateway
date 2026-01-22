@@ -20,10 +20,10 @@ body:json {
 script:post-response {
   // persist access/refresh tokens for subsequent folders
   let body = res.getBody();
-  bru.setEnvVar("accessToken",body.data.accessToken);
-  bru.setEnvVar("refreshToken",body.data.refreshToken);
-  if (body.data.profile?.id) {
-    bru.setEnvVar("profileId", body.data.profile.id);
+  bru.setEnvVar("accessToken",body.data.attributes.accessToken);
+  bru.setEnvVar("refreshToken",body.data.attributes.refreshToken);
+  if (body.data.attributes.profile?.id) {
+    bru.setEnvVar("profileId", body.data.attributes.profile.id);
   }
 }
 

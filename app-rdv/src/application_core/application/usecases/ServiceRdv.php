@@ -8,6 +8,7 @@ use toubilib\core\application\ports\api\dtos\outputs\CreneauDTO;
 use toubilib\core\application\ports\api\dtos\outputs\RendezVousDTO;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
+use toubilib\core\application\ports\spi\repositoryInterfaces\PatientRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PraticienRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
 use toubilib\core\domain\entities\Rdv;
@@ -24,6 +25,8 @@ final class ServiceRdv implements ServiceRdvInterface
     public function __construct(
         private RdvRepositoryInterface       $rdvRepository,
         private PraticienRepositoryInterface $praticienRepository,
+        private PatientRepositoryInterface   $patientRepository,
+        private EventPublisherInterface      $eventPublisher,
         private MonologLoggerInterface       $logger
     )
     {
@@ -49,17 +52,12 @@ final class ServiceRdv implements ServiceRdvInterface
 
     public function creerRdv(InputRendezVousDTO $input): string
     {
-        $praticien = $this->praticienRepository->findDetailById($input->praticienId);
+        $praticien = $this->praticienRepository->getById($input->praticienId);
         if ($praticien === null) {
             throw new PraticienNotFoundException('Praticien not found');
         }
 
         $fin = $input->debut->modify('+' . $input->dureeMinutes . ' minutes');
-
-        // NB ex.4: le contrôle des indisponibilités est géré côté microservice praticiens.
-        // Ici, on contrôle seulement:
-        // - conflits avec les RDVs existants (DB RDV)
-        // - disponibilité “horaire” du praticien (via microservice praticiens)
 
         $existants = $this->rdvRepository->listForPraticienBetween(
             $input->praticienId,
@@ -78,6 +76,24 @@ final class ServiceRdv implements ServiceRdvInterface
 
         $rdv = Rdv::fromInputDTO($input);
         $this->rdvRepository->create($rdv);
+
+        $praticien = $this->praticienRepository->getById($input->praticienId);
+        if ($praticien === null) {
+            throw new PraticienNotFoundException('Praticien not found after creating rdv');
+        }
+
+        $patient = $this->patientRepository->getById($input->patientId);
+        if ($patient === null) {
+            throw new PraticienNotFoundException('Patient not found after creating rdv');
+        }
+
+        $mailRdv = new MailRdv(
+            'rdv_created',
+            $rdv,
+            [$praticien, $patient]
+        );
+    
+        $this->eventPublisher->publish('rdv.created', $mailRdv->toArray());
         return $rdv->getId();
     }
 

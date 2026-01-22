@@ -6,6 +6,7 @@ use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PraticienRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\IndisponibiliteRepositoryInterface;
+use toubilib\core\application\ports\spi\repositoryInterfaces\PatientRepositoryInterface;
 use toubilib\core\application\usecases\AuthzService;
 use toubilib\core\application\usecases\ServicePraticien;
 use toubilib\core\application\usecases\ServiceRdv;
@@ -15,21 +16,12 @@ use toubilib\infra\repositories\PDOIndisponibiliteRepository;
 use toubilib\infra\adapters\MonologLogger;
 use GuzzleHttp\Client;
 use toubilib\infra\adapters\HttpPraticienRepository;
+use toubilib\infra\adapters\HttpPatientRepository;
 
 return [
     // --- Services ---
     MonologLoggerInterface::class => static function ($c) {
         return new MonologLogger($c);
-    },
-
-    // Client HTTP vers microservice praticiens
-    'client.praticiens' => static function ($c) {
-        $baseUri = getenv('PRATICIENS_API_BASE_URI') ?: 'http://api.praticiens:80/api/';
-        return new Client([
-            'base_uri' => rtrim($baseUri, '/') . '/',
-            'http_errors' => false,
-            'timeout' => 10.0,
-        ]);
     },
 
     ServicePraticienInterface::class => static function ($c) {
@@ -43,6 +35,8 @@ return [
         return new ServiceRdv(
             $c->get(RdvRepositoryInterface::class),
             $c->get(PraticienRepositoryInterface::class),
+            $c->get(PatientRepositoryInterface::class),
+            $c->get(AmqpEventPublisher::class),
             $c->get(MonologLoggerInterface::class)
         );
     },
@@ -75,5 +69,19 @@ return [
         return new PDOIndisponibiliteRepository(
             $c->get('db.praticien')
         );
+    },
+
+    PatientRepositoryInterface::class => static function ($c) {
+        return new HttpPatientRepository(
+            $c->get('client.patients')
+        );
+    },
+
+    AmqpEventPublisher::class => static function ($c) {
+        $connection = $c->get('rabbitmq.mailer');
+        $exchange = $_ENV['RABBITMQ_EXCHANGE'];
+        $routingKey = $_ENV['RABBITMQ_ROUTING_KEY'];
+
+        return new AmqpEventPublisher($connection, $exchange, $routingKey);
     },
 ];

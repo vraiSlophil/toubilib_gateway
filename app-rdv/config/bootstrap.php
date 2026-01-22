@@ -9,8 +9,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Slim\Factory\AppFactory;
 use Slim\Exception\HttpException;
 
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
+$dotenv = Dotenv::createImmutable(__DIR__, '.env');
+$dotenv->safeLoad();
 
 $builder = new ContainerBuilder();
 $builder->addDefinitions(__DIR__ . '/settings.php');
@@ -89,10 +89,21 @@ $errorMw->setDefaultErrorHandler(
         }
 
         $message = $displayErrorDetails ? $exception->getMessage() : 'Internal server error';
-        $payload = json_encode(['error' => ['message' => $message]], JSON_UNESCAPED_SLASHES);
+        $error = [
+            'status' => (string)$status,
+            'title' => $message,
+        ];
+        if ($displayErrorDetails) {
+            $error['detail'] = $exception->getMessage();
+            $error['meta'] = [
+                'exception' => $exception::class,
+                'trace' => explode("\n", $exception->getTraceAsString()),
+            ];
+        }
+        $payload = json_encode(['errors' => [$error]], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $response = $app->getResponseFactory()->createResponse($status);
         $response->getBody()->write($payload === false ? 'null' : $payload);
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response->withHeader('Content-Type', 'application/vnd.api+json');
     }
 );
 
