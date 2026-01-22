@@ -13,6 +13,7 @@ services:
       - "7080:80"
     volumes:
       - ./gateway:/var/php
+      - ./.env:/var/php/config/.env:ro
     working_dir: /var/php
     networks:
       - toubilib.net
@@ -28,6 +29,7 @@ services:
       dockerfile: 8.4-cli.Dockerfile
     volumes:
       - ./app:/var/php
+      - ./.env:/var/php/config/.env:ro
     working_dir: /var/php
     networks:
       - toubilib.net
@@ -46,6 +48,7 @@ services:
       dockerfile: 8.4-cli.Dockerfile
     volumes:
       - ./app-praticiens:/var/php
+      - ./.env:/var/php/config/.env:ro
     working_dir: /var/php
     networks:
       - toubilib.net
@@ -61,6 +64,7 @@ services:
       dockerfile: 8.4-cli.Dockerfile
     volumes:
       - ./app-patients:/var/php
+      - ./.env:/var/php/config/.env:ro
     working_dir: /var/php
     networks:
       - toubilib.net
@@ -76,6 +80,7 @@ services:
       dockerfile: 8.4-cli.Dockerfile
     volumes:
       - ./app-rdv:/var/php
+      - ./.env:/var/php/config/.env:ro
     working_dir: /var/php
     networks:
       - toubilib.net
@@ -93,6 +98,7 @@ services:
       dockerfile: 8.4-cli.Dockerfile
     volumes:
       - ./app-auth:/var/php
+      - ./.env:/var/php/config/.env:ro
     working_dir: /var/php
     networks:
       - toubilib.net
@@ -108,6 +114,7 @@ services:
       dockerfile: 8.4-cli.Dockerfile
     volumes:
       - ./app-mailer:/var/php
+      - ./.env:/var/php/config/.env:ro
     working_dir: /var/php
     networks:
       - toubilib.net

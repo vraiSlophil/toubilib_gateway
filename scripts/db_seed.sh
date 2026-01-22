@@ -10,7 +10,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SQL_DIR="$ROOT_DIR/sql"
-ENV_FILE="$ROOT_DIR/app/config/.env"
+ENV_FILE="$ROOT_DIR/.env"
 
 APPLY_SCHEMA=1
 APPLY_DATA=1
