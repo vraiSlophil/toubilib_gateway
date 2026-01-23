@@ -4,10 +4,11 @@ namespace toubilib\core\domain\entities;
 
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
+use JsonSerializable;
 use toubilib\core\application\ports\api\dtos\inputs\InputRendezVousDTO;
 use toubilib\core\domain\exceptions\RdvPastCannotBeCancelledException;
 
-final class Rdv
+final class Rdv implements JsonSerializable
 {
     public const STATUS_NOT_OK = 0;
     public const STATUS_OK = 1;
@@ -67,5 +68,26 @@ final class Rdv
     public function setStatus(bool $status): void
     {
         $this->status = $status ? self::STATUS_OK : self::STATUS_NOT_OK;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'praticien_id' => $this->praticienId,
+            'patient_id' => $this->patientId,
+            'patient_email' => $this->patientEmail,
+            'debut' => $this->debut->format(DATE_ATOM),
+            'duree_minutes' => $this->dureeMinutes,
+            'fin' => $this->getFin()->format(DATE_ATOM),
+            'date_creation' => $this->dateCreation->format(DATE_ATOM),
+            'status' => $this->status,
+            'motif_visite' => $this->motifVisite,
+        ];
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return $this->toArray();
     }
 }
