@@ -19,6 +19,20 @@ use toubilib\infra\adapters\AmqpEventPublisher;
 use toubilib\infra\adapters\HttpPraticienRepository;
 use toubilib\infra\adapters\HttpPatientRepository;
 
+if (!function_exists('env')) {
+    function env(string $key, mixed $default = null, ?callable $cast = null): mixed
+    {
+        $value = getenv($key);
+        if ($value === false) {
+            $value = $default;
+        }
+        if ($cast !== null) {
+            return $cast($value);
+        }
+        return $value;
+    }
+}
+
 return [
     // --- Services ---
     MonologLoggerInterface::class => static function ($c) {
@@ -86,11 +100,11 @@ return [
 
     AmqpEventPublisher::class => static function ($c) {
         $connection = $c->get('rabbitmq.mailer');
-        $exchange = $_ENV['RABBITMQ_EXCHANGE'];
-        $queue = $_ENV['RABBITMQ_QUEUE'];
+        $exchange = env('RABBITMQ_EXCHANGE', 'rdv.events');
+        $queue = env('RABBITMQ_QUEUE', 'notif.mail');
         $routingKeys = [
-            'rdv.created' => $_ENV['RABBITMQ_ROUTING_KEY_MAIL_CREATED'],
-            'rdv.cancelled' => $_ENV['RABBITMQ_ROUTING_KEY_MAIL_CANCELLED'],
+            'rdv.created' => env('RABBITMQ_ROUTING_KEY_MAIL_CREATED', 'rdv.created'),
+            'rdv.cancelled' => env('RABBITMQ_ROUTING_KEY_MAIL_CANCELLED', 'rdv.cancelled'),
         ];
 
         return new AmqpEventPublisher($connection, $exchange, $queue, $routingKeys);

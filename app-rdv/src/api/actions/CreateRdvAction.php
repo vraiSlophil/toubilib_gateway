@@ -2,6 +2,7 @@
 
 namespace toubilib\api\actions;
 
+use DI\NotFoundException;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -9,6 +10,7 @@ use Throwable;
 use toubilib\core\application\ports\api\dtos\inputs\InputRendezVousDTO;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\domain\entities\Roles;
+use toubilib\core\domain\exceptions\PatientNotFoundException;
 use toubilib\core\domain\exceptions\PraticienNotFoundException;
 use toubilib\core\domain\exceptions\InvalidMotifException;
 use toubilib\core\domain\exceptions\SlotConflictException;
@@ -66,6 +68,10 @@ final class CreateRdvAction
             $rdvId = $this->serviceRdv->creerRdv($input);
         } catch (PraticienNotFoundException $e) {
             return ApiResponseBuilder::create()->status(404)->error('Praticien not found', $e)->build($response);
+        } catch (PatientNotFoundException $e) {
+            return ApiResponseBuilder::create()->status(404)->error('Patient not found', $e)->build($response);
+        } catch (NotFoundException $e) {
+            return ApiResponseBuilder::create()->status(404)->error('Ressource not found', $e)->build($response);
         } catch (InvalidMotifException|PraticienUnavailableException $e) {
             return ApiResponseBuilder::create()->status(422)->error($e->getMessage(), $e)->build($response);
         } catch (SlotConflictException $e) {

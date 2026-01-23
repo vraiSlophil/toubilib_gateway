@@ -15,6 +15,7 @@ use toubilib\core\application\ports\spi\repositoryInterfaces\PraticienRepository
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
 use toubilib\core\domain\entities\MailRdv;
 use toubilib\core\domain\entities\Rdv;
+use toubilib\core\domain\exceptions\PatientNotFoundException;
 use toubilib\core\domain\exceptions\RdvNotFoundException;
 use toubilib\core\domain\exceptions\PraticienNotFoundException;
 use toubilib\core\domain\exceptions\SlotConflictException;
@@ -78,7 +79,7 @@ final class ServiceRdv implements ServiceRdvInterface
 
         $patient = $this->patientRepository->getById($input->patientId);
         if ($patient === null) {
-            throw new NotFoundException('Patient not found after creating rdv');
+            throw new PatientNotFoundException('Patient not found');
         }
 
         $rdv = Rdv::fromInputDTO($input);
@@ -103,6 +104,17 @@ final class ServiceRdv implements ServiceRdvInterface
         $rdv->annuler();
         $this->rdvRepository->delete($rdvId);
         $this->logger->log('info', 'Rdv cancelled', ['rdv_id' => $rdvId]);
+
+        $praticien = $this->praticienRepository->getById($rdv->getPraticienId());
+        $patient = $this->patientRepository->getById($rdv->getPatientId());
+
+        $mailRdv = new MailRdv(
+            'rdv.cancelled',
+            $rdv,
+            [$praticien, $patient]
+        );
+
+        $this->eventPublisher->publish('rdv.cancelled', $mailRdv->toArray());
     }
 
     public function listRdvsForUser(ProfileDTO $user, bool $pastOnly = false): array

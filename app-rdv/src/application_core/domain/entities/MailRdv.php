@@ -53,8 +53,31 @@ final class MailRdv implements JsonSerializable
 
     private function isValidRecipient(mixed $recipient): bool
     {
-        $email = $this->getRecipientEmail($recipient);
-        return $email !== null && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+        if (is_string($recipient)) {
+            $email = trim($recipient);
+            return $email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+        }
+
+        if (!is_object($recipient)) {
+            return false;
+        }
+
+        $email = null;
+        if (method_exists($recipient, 'getEmail')) {
+            $email = $recipient->getEmail();
+            $email = is_string($email) ? trim($email) : null;
+        }
+
+        $telephone = null;
+        if (method_exists($recipient, 'getTelephone')) {
+            $telephone = $recipient->getTelephone();
+            $telephone = is_string($telephone) ? trim($telephone) : null;
+        }
+
+        $hasEmail = $email !== null && $email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+        $hasTelephone = $telephone !== null && $telephone !== '';
+
+        return $hasEmail || $hasTelephone;
     }
 
     public function toArray(): array
@@ -63,48 +86,12 @@ final class MailRdv implements JsonSerializable
             'event_type' => $this->eventType,
             'rdv' => $this->rdv,
             'recipients' => array_map([$this, 'recipientToArray'], $this->recipients),
-            'recipient_emails' => $this->getRecipientEmails(),
         ];
     }
 
     public function jsonSerialize(): mixed
     {
         return $this->toArray();
-    }
-
-    private function getRecipientEmail(mixed $recipient): ?string
-    {
-        if (is_string($recipient)) {
-            $email = trim($recipient);
-            return $email !== '' ? $email : null;
-        }
-
-        if (!is_object($recipient)) {
-            return null;
-        }
-
-        if (method_exists($recipient, 'getEmail')) {
-            $email = $recipient->getEmail();
-            if (is_string($email) && trim($email) !== '') {
-                return $email;
-            }
-        }
-
-        return null;
-    }
-
-    /** @return string[] */
-    private function getRecipientEmails(): array
-    {
-        $emails = [];
-        foreach ($this->recipients as $recipient) {
-            $email = $this->getRecipientEmail($recipient);
-            if ($email !== null && filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
-                $emails[] = $email;
-            }
-        }
-
-        return array_values(array_unique($emails));
     }
 
     private function recipientToArray(object|string $recipient): array

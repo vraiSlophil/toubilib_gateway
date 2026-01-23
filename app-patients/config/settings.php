@@ -1,6 +1,21 @@
 <?php
 
+if (!function_exists('env')) {
+    function env(string $key, mixed $default = null, ?callable $cast = null): mixed
+    {
+        $value = getenv($key);
+        if ($value === false) {
+            $value = $default;
+        }
+        if ($cast !== null) {
+            return $cast($value);
+        }
+        return $value;
+    }
+}
+
 return [
+
     'settings' => [
         'displayErrorDetails' => true,
         'logError' => true,
@@ -9,11 +24,11 @@ return [
     ],
 
     'db.patient' => static function (): PDO {
-        $driver = $_ENV['PAT_DRIVER'];
-        $host = $_ENV['PAT_HOST'];
-        $db = $_ENV['PAT_DATABASE'];
-        $user = $_ENV['PAT_USERNAME'];
-        $pass = $_ENV['PAT_PASSWORD'];
+        $driver = env('PAT_DRIVER', 'pgsql');
+        $host = env('PAT_HOST', 'toubipat.db');
+        $db = env('PAT_DATABASE', 'toubipat');
+        $user = env('PAT_USERNAME', 'toubipat');
+        $pass = env('PAT_PASSWORD', 'toubipat');
         $charset = 'utf8mb4';
 
         $dsn = $driver === 'mysql'

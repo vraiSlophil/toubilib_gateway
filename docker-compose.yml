@@ -21,7 +21,7 @@ services:
       - api.toubilib
     env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
-    
+
   # service api.toubilib : api pour la prise de rdv
   api.toubilib:
     build:
@@ -121,7 +121,17 @@ services:
     depends_on:
       - rabbitmq
     env_file: ./.env
-    command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
+    command: sh -c "php /var/php/bin/consume.php"
+
+  mailcatcher:
+    build:
+      context: build
+      dockerfile: mailcatcher.Dockerfile
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - toubilib.net
 
   # service RabbitMQ
   rabbitmq:

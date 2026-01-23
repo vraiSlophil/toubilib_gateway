@@ -6,12 +6,24 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Throwable;
 
+function env(string $key, mixed $default = null, ?callable $cast = null): mixed
+{
+    $value = getenv($key);
+    if ($value === false) {
+        $value = $default;
+    }
+    if ($cast !== null) {
+        return $cast($value);
+    }
+    return $value;
+}
+
 final class JwtPayloadDecoder
 {
     public function decode(string $token): ?array
     {
-        $secret = getenv('JWT_SECRET') ?: ($_ENV['JWT_SECRET'] ?? '');
-        $algo = getenv('JWT_ALGORITHM') ?: ($_ENV['JWT_ALGORITHM'] ?? 'HS256');
+        $secret = env('JWT_SECRET', '');
+        $algo = env('JWT_ALGORITHM', 'HS256');
         if ($secret === '') {
             return null;
         }

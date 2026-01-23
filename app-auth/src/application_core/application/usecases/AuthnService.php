@@ -28,7 +28,7 @@ final class AuthnService implements AuthnServiceInterface
     {
         try {
             $user = $this->authRepository->byEmail($credentials->email);
-        } catch (RepositoryEntityNotFoundException $e) {
+        } catch (Exception $e) {
             throw new AuthenticationFailedException('Invalid credentials');
         }
 
