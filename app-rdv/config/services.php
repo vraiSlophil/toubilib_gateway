@@ -87,11 +87,12 @@ return [
     AmqpEventPublisher::class => static function ($c) {
         $connection = $c->get('rabbitmq.mailer');
         $exchange = $_ENV['RABBITMQ_EXCHANGE'];
+        $queue = $_ENV['RABBITMQ_QUEUE'];
         $routingKeys = [
             'rdv.created' => $_ENV['RABBITMQ_ROUTING_KEY_MAIL_CREATED'],
             'rdv.cancelled' => $_ENV['RABBITMQ_ROUTING_KEY_MAIL_CANCELLED'],
         ];
 
-        return new AmqpEventPublisher($connection, $exchange, $routingKeys);
+        return new AmqpEventPublisher($connection, $exchange, $queue, $routingKeys);
     },
 ];
