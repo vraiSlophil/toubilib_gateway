@@ -35,17 +35,31 @@ final class CreateRdvAction
         }
 
         $user = $request->getAttribute('authenticated_user');
-        if ($user === null || $user->role !== Roles::PATIENT) {
+        if ($user === null) {
             return ApiResponseBuilder::create()
-                ->status(403)
-                ->error('Only patients can create appointments.')
+                ->status(401)
+                ->error('Missing authenticated user.')
                 ->build($response);
         }
 
-        $payload = array_merge($parsed, [
-            'patientId' => $user->ID,
-            'patientEmail' => $user->email,
-        ]);
+        if ($user->role !== Roles::PATIENT && $user->role !== Roles::PRATICIEN) {
+            return ApiResponseBuilder::create()
+                ->status(403)
+                ->error('Only patients or practitioners can create appointments.')
+                ->build($response);
+        }
+
+        if ($user->role === Roles::PATIENT) {
+            $payload = array_merge($parsed, [
+                'patientId' => $user->ID,
+                'patientEmail' => $user->email,
+            ]);
+        } else {
+            // Practitioners can create an appointment for a patient
+            $payload = array_merge($parsed, [
+                'praticienId' => $user->ID,
+            ]);
+        }
 
         try {
             $input = InputRendezVousDTO::fromArray($payload);

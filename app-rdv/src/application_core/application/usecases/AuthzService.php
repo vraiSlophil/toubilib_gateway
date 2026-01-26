@@ -49,7 +49,7 @@ final class AuthzService implements AuthzServiceInterface
 
     public function canCreateRdv(ProfileDTO $user): bool
     {
-        return $user->role === Roles::PATIENT;
+        return in_array($user->role, [Roles::PATIENT, Roles::PRATICIEN], true);
     }
 
     public function canListUserRdvs(ProfileDTO $user): bool
