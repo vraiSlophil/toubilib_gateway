@@ -84,21 +84,105 @@ final class EmailMessageHandler implements MessageHandlerInterface
     {
         $rdv = $payload['rdv'] ?? [];
         $profiles = $this->extractProfiles($payload);
-        $debut = $rdv['debut'] ?? 'N/A';
-        $fin = $rdv['fin'] ?? 'N/A';
-        $motif = $rdv['motif_visite'] ?? 'N/A';
+        $debut = $this->parseDateTime($rdv['debut'] ?? null);
+        $fin = $this->parseDateTime($rdv['fin'] ?? null);
+        $dureeMinutes = $rdv['duree_minutes'] ?? $rdv['dureeMinutes'] ?? null;
+        $motif = (string) ($rdv['motif_visite'] ?? 'N/A');
+
         $praticienName = trim(($profiles['praticien']['titre'] ? ($profiles['praticien']['titre'] . ' ') : '') . ($profiles['praticien']['prenom'] ?? '') . ' ' . ($profiles['praticien']['nom'] ?? ''));
         $patientName = trim(($profiles['patient']['prenom'] ?? '') . ' ' . ($profiles['patient']['nom'] ?? ''));
 
-        $lines = [
-            'Type d\'événement : ' . $eventType,
-            'Rendez-vous :',
-            '- Praticien : ' . ($praticienName !== '' ? $praticienName : 'N/A'),
-            '- Patient : ' . ($patientName !== '' ? $patientName : 'N/A'),
-            '- Début : ' . $debut,
-            '- Fin : ' . $fin,
-            '- Motif : ' . $motif,
-        ];
+        $specialite = $profiles['praticien']['specialite'] ?? null;
+        $specialiteLibelle = is_array($specialite) ? ($specialite['libelle'] ?? null) : null;
+        $specialiteDescription = is_array($specialite) ? ($specialite['description'] ?? null) : null;
+
+        $cabinet = $profiles['praticien']['structure'] ?? null;
+        $hasCabinet = is_array($cabinet)
+            && (
+                (($cabinet['nom'] ?? null) !== null && (string) $cabinet['nom'] !== '')
+                || (($cabinet['adresse'] ?? null) !== null && (string) $cabinet['adresse'] !== '')
+                || (($cabinet['ville'] ?? null) !== null && (string) $cabinet['ville'] !== '')
+                || (($cabinet['code_postal'] ?? null) !== null && (string) $cabinet['code_postal'] !== '')
+                || (($cabinet['telephone'] ?? null) !== null && (string) $cabinet['telephone'] !== '')
+            );
+
+        $lines = [];
+        $lines[] = 'Bonjour,';
+        $lines[] = '';
+
+        $lines[] = $eventType === 'rdv.cancelled'
+            ? 'Votre rendez-vous a été annulé.'
+            : 'Votre rendez-vous est confirmé.';
+
+        $whenLineParts = [];
+        $whenLineParts[] = $debut ? $debut->format('d/m/Y \\à H\\hi') : 'N/A';
+        if ($fin) {
+            $whenLineParts[] = '(jusqu\'à ' . $fin->format('H\\hi') . ')';
+        }
+        $whenLineParts[] = '— ' . ($praticienName !== '' ? $praticienName : 'N/A');
+        if (is_string($specialiteLibelle) && trim($specialiteLibelle) !== '') {
+            $whenLineParts[] = '(' . trim($specialiteLibelle) . ')';
+        }
+
+        $lines[] = implode(' ', $whenLineParts);
+        $lines[] = '';
+
+        $lines[] = 'Date : ' . ($debut ? $debut->format('d/m/Y') : 'N/A');
+        $heure = $debut ? $debut->format('H\\hi') : 'N/A';
+        if ($fin) {
+            $heure .= ' — ' . $fin->format('H\\hi');
+        }
+        $lines[] = 'Heure : ' . $heure;
+        if ($dureeMinutes !== null && $dureeMinutes !== '') {
+            $lines[] = 'Durée : ' . (string) $dureeMinutes . ' min';
+        }
+
+        $lines[] = 'Motif : ' . $motif;
+        if (is_string($specialiteDescription) && trim($specialiteDescription) !== '') {
+            $lines[] = '  ' . trim($specialiteDescription);
+        }
+
+        $praticienLine = 'Praticien : ' . ($praticienName !== '' ? $praticienName : 'N/A');
+        if (is_string($specialiteLibelle) && trim($specialiteLibelle) !== '') {
+            $praticienLine .= ' — ' . trim($specialiteLibelle);
+        }
+        $lines[] = $praticienLine;
+
+        if ($hasCabinet) {
+            $lines[] = 'Cabinet :';
+            if (($cabinet['nom'] ?? null) !== null && trim((string) $cabinet['nom']) !== '') {
+                $lines[] = '  ' . trim((string) $cabinet['nom']);
+            }
+            $adresse = trim((string) ($cabinet['adresse'] ?? ''));
+            $cp = trim((string) ($cabinet['code_postal'] ?? ''));
+            $ville = trim((string) ($cabinet['ville'] ?? ''));
+            if ($adresse !== '' || $cp !== '' || $ville !== '') {
+                $addrLines = [];
+                if ($adresse !== '') {
+                    $addrLines[] = $adresse;
+                }
+                $cityLine = trim($cp . ' ' . $ville);
+                if ($cityLine !== '') {
+                    $addrLines[] = $cityLine;
+                }
+                foreach ($addrLines as $addrLine) {
+                    $lines[] = '  ' . $addrLine;
+                }
+            }
+            if (($cabinet['telephone'] ?? null) !== null && trim((string) $cabinet['telephone']) !== '') {
+                $lines[] = '  Contact : ' . trim((string) $cabinet['telephone']);
+            }
+        }
+
+        $patientLine = 'Patient : ' . ($patientName !== '' ? $patientName : 'N/A');
+        $patientEmail = $profiles['patient']['email'] ?? null;
+        if (is_string($patientEmail) && trim($patientEmail) !== '') {
+            $patientLine .= ' — ' . trim($patientEmail);
+        }
+        $lines[] = $patientLine;
+
+        $lines[] = '';
+        $lines[] = 'Email automatique Toubilib. Si une information semble incorrecte, merci de contacter le cabinet.';
 
         return implode("\n", $lines);
     }
@@ -128,6 +212,18 @@ final class EmailMessageHandler implements MessageHandlerInterface
         ];
 
         return $this->renderer->render('rdv_notification.html.twig', $context);
+    }
+
+    private function parseDateTime(mixed $value): ?\DateTimeImmutable
+    {
+        if (!is_string($value) || trim($value) === '') {
+            return null;
+        }
+        try {
+            return new \DateTimeImmutable($value);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**

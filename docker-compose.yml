@@ -107,7 +107,7 @@ services:
     env_file: ./.env
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
-  # service microservice envoi de mails (placeholder)
+  # service microservice envoi de mails
   mailer.toubilib:
     build:
       context: build
