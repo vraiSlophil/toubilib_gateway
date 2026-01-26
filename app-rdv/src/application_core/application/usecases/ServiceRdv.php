@@ -108,6 +108,15 @@ final class ServiceRdv implements ServiceRdvInterface
         $praticien = $this->praticienRepository->getById($rdv->getPraticienId());
         $patient = $this->patientRepository->getById($rdv->getPatientId());
 
+        if ($praticien === null || $patient === null) {
+            $this->logger->log('warning', 'Skipping rdv.cancelled notification: missing recipient profile(s)', [
+                'rdv_id' => $rdvId,
+                'praticien_found' => $praticien !== null,
+                'patient_found' => $patient !== null,
+            ]);
+            return;
+        }
+
         $mailRdv = new MailRdv(
             'rdv.cancelled',
             $rdv,

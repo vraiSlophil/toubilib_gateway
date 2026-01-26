@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace toubilib\mailer\Consumer;
+namespace toubilib\mailer\infrastructure\adapters;
 
 use DateTimeImmutable;
+use toubilib\mailer\application\ports\api\MessageHandlerInterface;
 
 final class FileLoggingMessageHandler implements MessageHandlerInterface
 {

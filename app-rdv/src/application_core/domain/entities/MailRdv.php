@@ -83,7 +83,6 @@ final class MailRdv implements JsonSerializable
     public function toArray(): array
     {
         return [
-            'event_type' => $this->eventType,
             'rdv' => $this->rdv,
             'recipients' => array_map([$this, 'recipientToArray'], $this->recipients),
         ];
@@ -131,6 +130,7 @@ final class MailRdv implements JsonSerializable
 
         if ($recipient instanceof PraticienDetail) {
             $specialite = $recipient->getSpecialite();
+            $structure = $recipient->getStructure();
             return [
                 'type' => 'praticien',
                 'id' => $recipient->getId(),
@@ -144,6 +144,14 @@ final class MailRdv implements JsonSerializable
                     'libelle' => $specialite->getLibelle(),
                     'description' => $specialite->getDescription(),
                 ],
+                'structure' => $structure ? [
+                    'id' => $structure->getId(),
+                    'nom' => $structure->getNom(),
+                    'adresse' => $structure->getAdresse(),
+                    'code_postal' => $structure->getCodePostal(),
+                    'ville' => $structure->getVille(),
+                    'telephone' => $structure->getTelephone(),
+                ] : null,
             ];
         }
 

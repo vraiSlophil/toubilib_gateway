@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f6f8fb;font-family:Arial, sans-serif;color:#1f2d3d;">
+    {% set praticien_fullname = (praticien.titre ? praticien.titre ~ ' ' : '') ~ praticien.prenom ~ ' ' ~ praticien.nom %}
+    {% set patient_fullname = patient.prenom ~ ' ' ~ patient.nom %}
+    {% set cabinet = praticien.structure ?? null %}
+    {% set has_cabinet = cabinet and (cabinet.nom or cabinet.adresse or cabinet.ville or cabinet.code_postal or cabinet.telephone) %}
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f6f8fb;padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background:#ffffff;border-radius:12px;box-shadow:0 6px 18px rgba(31,45,61,0.08);overflow:hidden;">
+            <tr>
+              <td style="padding:24px 28px;background:{{ accent }};color:#fff;">
+                <h1 style="margin:0;font-size:22px;">{{ title }}</h1>
+                <p style="margin:6px 0 0;font-size:14px;opacity:0.9;">
+                  {% if event_type == 'rdv.cancelled' %}
+                    Annulation de rendez-vous
+                  {% else %}
+                    Confirmation de rendez-vous
+                  {% endif %}
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 28px;">
+                <p style="margin:0 0 16px;font-size:15px;">Bonjour,</p>
+                <p style="margin:0 0 12px;font-size:15px;">
+                  {% if event_type == 'rdv.cancelled' %}
+                    Votre rendez-vous a été annulé.
+                  {% else %}
+                    Votre rendez-vous est confirmé.
+                  {% endif %}
+                </p>
+
+                <p style="margin:0 0 18px;font-size:15px;line-height:1.45;">
+                  <strong>{{ rdv.debut|date('d/m/Y \\à H\\hi') }}</strong>
+                  {% if rdv.fin %}
+                    (jusqu'à {{ rdv.fin|date('H\\hi') }})
+                  {% endif %}
+                  — <strong>{{ praticien_fullname|trim }}</strong>
+                  {% if praticien.specialite and praticien.specialite.libelle %}
+                    ({{ praticien.specialite.libelle }})
+                  {% endif %}
+                </p>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;font-size:14px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+                  <tr>
+                    <td style="padding:10px 12px;background:#f8fafc;color:#6b7b93;width:160px;">Date</td>
+                    <td style="padding:10px 12px;font-weight:600;">{{ rdv.debut|date('d/m/Y') }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:10px 12px;background:#f8fafc;color:#6b7b93;">Heure</td>
+                    <td style="padding:10px 12px;font-weight:600;">
+                      {{ rdv.debut|date('H\\hi') }}
+                      {% if rdv.fin %} — {{ rdv.fin|date('H\\hi') }}{% endif %}
+                    </td>
+                  </tr>
+                  {% if rdv.duree_minutes is defined and rdv.duree_minutes %}
+                    <tr>
+                      <td style="padding:10px 12px;background:#f8fafc;color:#6b7b93;">Durée</td>
+                      <td style="padding:10px 12px;font-weight:600;">{{ rdv.duree_minutes }} min</td>
+                    </tr>
+                  {% endif %}
+                  <tr>
+                    <td style="padding:10px 12px;background:#f8fafc;color:#6b7b93;">Motif</td>
+                    <td style="padding:10px 12px;font-weight:600;">
+                      {{ rdv.motif_visite }}
+                      {% if praticien.specialite and praticien.specialite.description %}
+                        <div style="margin-top:6px;font-weight:400;color:#6b7b93;font-size:13px;line-height:1.35;">
+                          {{ praticien.specialite.description }}
+                        </div>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:10px 12px;background:#f8fafc;color:#6b7b93;">Praticien</td>
+                    <td style="padding:10px 12px;font-weight:600;">
+                      {{ praticien_fullname|trim }}
+                      {% if praticien.specialite and praticien.specialite.libelle %}
+                        <span style="font-weight:400;color:#6b7b93;">— {{ praticien.specialite.libelle }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% if has_cabinet %}
+                    <tr>
+                      <td style="padding:10px 12px;background:#f8fafc;color:#6b7b93;">Cabinet</td>
+                      <td style="padding:10px 12px;">
+                        {% if cabinet.nom %}
+                          <div style="font-weight:600;">{{ cabinet.nom }}</div>
+                        {% endif %}
+                        {% if cabinet.adresse or cabinet.ville or cabinet.code_postal %}
+                          <div style="margin-top:4px;color:#1f2d3d;">
+                            {% if cabinet.adresse %}{{ cabinet.adresse }}{% endif %}
+                            {% if cabinet.code_postal or cabinet.ville %}
+                              <br />
+                              {% if cabinet.code_postal %}{{ cabinet.code_postal }}{% endif %}
+                              {% if cabinet.ville %} {{ cabinet.ville }}{% endif %}
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                        {% if cabinet.telephone %}
+                          {% set tel_href = cabinet.telephone|replace({' ': '', '.': '', '-': '', '(': '', ')': ''}) %}
+                          <div style="margin-top:8px;color:#6b7b93;font-size:13px;">
+                            Contact : <a href="tel:{{ tel_href }}" style="color:#2c7be5;text-decoration:none;">{{ cabinet.telephone }}</a>
+                          </div>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endif %}
+                  <tr>
+                    <td style="padding:10px 12px;background:#f8fafc;color:#6b7b93;">Patient</td>
+                    <td style="padding:10px 12px;font-weight:600;">
+                      {{ patient_fullname|trim }}
+                      {% if patient.email %}
+                        <span style="font-weight:400;color:#6b7b93;">— {{ patient.email }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:22px 0 0;font-size:13px;color:#6b7b93;">
+                  Email automatique Toubilib. Si une information semble incorrecte, merci de contacter le cabinet.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

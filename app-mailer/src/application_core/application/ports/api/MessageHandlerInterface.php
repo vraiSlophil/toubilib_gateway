@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace toubilib\mailer\Consumer;
+namespace toubilib\mailer\application\ports\api;
 
 interface MessageHandlerInterface
 {

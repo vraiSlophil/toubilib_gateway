@@ -192,9 +192,9 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
                 (string)($s['id'] ?? ''),
                 (string)($s['nom'] ?? ''),
                 (string)($s['adresse'] ?? ''),
-                (string)($s['ville'] ?? ''),
-                (string)($s['telephone'] ?? ''),
-                (string)($s['email'] ?? ''),
+                ($s['ville'] ?? null) !== null ? (string)$s['ville'] : null,
+                ($s['codePostal'] ?? $s['code_postal'] ?? null) !== null ? (string)($s['codePostal'] ?? $s['code_postal']) : null,
+                ($s['telephone'] ?? null) !== null ? (string)$s['telephone'] : null,
             );
         }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace toubilib\mailer\Config;
+namespace toubilib\mailer\infrastructure\config;
 
 final class AmqpConfig
 {

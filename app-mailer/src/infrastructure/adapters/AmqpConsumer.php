@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace toubilib\mailer\Consumer;
+namespace toubilib\mailer\infrastructure\adapters;
 
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -10,7 +10,8 @@ use PhpAmqpLib\Exception\AMQPConnectionClosedException;
 use PhpAmqpLib\Exception\AMQPIOException;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
-use toubilib\mailer\Config\AmqpConfig;
+use toubilib\mailer\application\ports\api\MessageHandlerInterface;
+use toubilib\mailer\infrastructure\config\AmqpConfig;
 
 final class AmqpConsumer
 {
