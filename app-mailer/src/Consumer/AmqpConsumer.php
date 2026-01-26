@@ -6,30 +6,84 @@ namespace toubilib\mailer\Consumer;
 
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Exception\AMQPConnectionClosedException;
+use PhpAmqpLib\Exception\AMQPIOException;
+use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 use toubilib\mailer\Config\AmqpConfig;
 
 final class AmqpConsumer
 {
-    private AMQPStreamConnection $connection;
-    private AMQPChannel $channel;
+    private ?AMQPStreamConnection $connection = null;
+    private ?AMQPChannel $channel = null;
 
     public function __construct(
         private readonly AmqpConfig $config,
         private readonly MessageHandlerInterface $handler
     ) {
-        $this->connection = new AMQPStreamConnection(
-            $config->host,
-            $config->port,
-            $config->user,
-            $config->pass,
-            $config->vhost
-        );
-        $this->channel = $this->connection->channel();
     }
 
     public function run(): void
     {
+        while (true) {
+            try {
+                $this->connect();
+                $this->setupTopology();
+                $this->consumeLoop();
+            } catch (AMQPTimeoutException) {
+                continue;
+            } catch (AMQPConnectionClosedException | AMQPIOException $e) {
+                $this->log("Connection lost: " . $e->getMessage());
+            } catch (\Throwable $e) {
+                $this->log("Fatal error: " . $e->getMessage());
+            } finally {
+                $this->close();
+            }
+
+            sleep(max(1, $this->config->reconnectDelay));
+            $this->log("Reconnecting to RabbitMQ...");
+        }
+    }
+
+    public function close(): void
+    {
+        if ($this->channel !== null) {
+            $this->channel->close();
+            $this->channel = null;
+        }
+        if ($this->connection !== null) {
+            $this->connection->close();
+            $this->connection = null;
+        }
+    }
+
+    private function connect(): void
+    {
+        $this->connection = new AMQPStreamConnection(
+            $this->config->host,
+            $this->config->port,
+            $this->config->user,
+            $this->config->pass,
+            $this->config->vhost,
+            false,
+            'AMQPLAIN',
+            null,
+            'en_US',
+            $this->config->connectionTimeout,
+            $this->config->readWriteTimeout,
+            null,
+            false,
+            $this->config->heartbeat
+        );
+        $this->channel = $this->connection->channel();
+    }
+
+    private function setupTopology(): void
+    {
+        if ($this->channel === null) {
+            throw new \RuntimeException('AMQP channel is not available.');
+        }
+
         $this->channel->basic_qos(null, $this->config->prefetch, null);
 
         $this->channel->exchange_declare(
@@ -53,6 +107,13 @@ final class AmqpConsumer
         }
 
         echo " [*] Waiting for messages on {$this->config->queue}. To exit press CTRL+C\n";
+    }
+
+    private function consumeLoop(): void
+    {
+        if ($this->channel === null) {
+            throw new \RuntimeException('AMQP channel is not available.');
+        }
 
         $callback = function (AMQPMessage $msg): void {
             $raw = $msg->getBody();
@@ -72,13 +133,16 @@ final class AmqpConsumer
         );
 
         while ($this->channel->is_consuming()) {
-            $this->channel->wait();
+            try {
+                $this->channel->wait(null, false, 5);
+            } catch (AMQPTimeoutException) {
+                continue;
+            }
         }
     }
 
-    public function close(): void
+    private function log(string $message): void
     {
-        $this->channel->close();
-        $this->connection->close();
+        fwrite(STDERR, sprintf("[%s] %s\n", date(DATE_ATOM), $message));
     }
 }

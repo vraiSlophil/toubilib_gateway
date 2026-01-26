@@ -18,7 +18,11 @@ final class AmqpConfig
         /** @var string[] */
         public readonly array $bindings,
         public readonly int $prefetch,
-        public readonly bool $queueDurable
+        public readonly bool $queueDurable,
+        public readonly int $heartbeat,
+        public readonly int $reconnectDelay,
+        public readonly float $connectionTimeout,
+        public readonly float $readWriteTimeout
     ) {
     }
 
@@ -34,6 +38,10 @@ final class AmqpConfig
         }
 
         $queueDurable = self::parseBool(getenv('RABBITMQ_QUEUE_DURABLE') ?: 'false');
+        $heartbeat = (int) (getenv('RABBITMQ_HEARTBEAT') ?: 30);
+        $reconnectDelay = (int) (getenv('RABBITMQ_RECONNECT_DELAY') ?: 5);
+        $connectionTimeout = (float) (getenv('RABBITMQ_CONNECTION_TIMEOUT') ?: 3.0);
+        $readWriteTimeout = (float) (getenv('RABBITMQ_READ_WRITE_TIMEOUT') ?: 3.0);
 
         return new self(
             host: getenv('RABBITMQ_MAILER_HOST') ?: (getenv('RABBITMQ_HOST') ?: 'rabbitmq'),
@@ -46,7 +54,11 @@ final class AmqpConfig
             queue: getenv('RABBITMQ_QUEUE') ?: 'rdv.mail.queue',
             bindings: $bindings,
             prefetch: (int) (getenv('RABBITMQ_PREFETCH') ?: 1),
-            queueDurable: $queueDurable
+            queueDurable: $queueDurable,
+            heartbeat: $heartbeat,
+            reconnectDelay: $reconnectDelay,
+            connectionTimeout: $connectionTimeout,
+            readWriteTimeout: $readWriteTimeout
         );
     }
 

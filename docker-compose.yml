@@ -119,9 +119,11 @@ services:
     networks:
       - toubilib.net
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     env_file: ./.env
-    command: sh -c "php /var/php/bin/consume.php"
+    command: sh -c "composer install && php /var/php/bin/consume.php"
+    restart: unless-stopped
 
   mailcatcher:
     build:
