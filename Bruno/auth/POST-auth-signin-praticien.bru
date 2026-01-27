@@ -19,6 +19,7 @@ body:json {
 
 script:post-response {
   let body = res.getBody();
+  if (body.errors) return;
   bru.setEnvVar("accessToken", body.data.attributes.accessToken);
   bru.setEnvVar("refreshToken", body.data.attributes.refreshToken);
   if (body.data.attributes.profile?.id) {

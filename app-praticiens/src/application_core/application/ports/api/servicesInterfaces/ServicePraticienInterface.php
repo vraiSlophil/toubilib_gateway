@@ -17,7 +17,7 @@ interface ServicePraticienInterface
     /** @return PraticienDTO[] */
     public function rechercherPraticiens(?int $specialiteId, ?string $ville): array;
 
-    public function createPraticien(InputPraticienDTO $input): PraticienDetailDTO;
+    public function createPraticien(InputPraticienDTO $input, ?string $forcedId = null): PraticienDetailDTO;
 
     public function updatePraticien(string $id, InputPraticienDTO $input): PraticienDetailDTO;
 

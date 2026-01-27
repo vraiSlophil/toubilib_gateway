@@ -229,7 +229,7 @@ final class PDOPraticienRepository implements PraticienRepositoryInterface
                 specialite_id, structure_id, rpps_id, organisation, nouveau_patient, titre
             ) VALUES (
                 :id, :nom, :prenom, :ville, :email, :telephone,
-                :specialite_id, NULL, :rpps_id, CAST(:organisation AS bit(1)), CAST(:nouveau_patient AS bit(1)), :titre
+                :specialite_id, :structure_id, :rpps_id, CAST(:organisation AS bit(1)), CAST(:nouveau_patient AS bit(1)), :titre
             )';
 
         $stmt = $this->pdo->prepare($sql);
@@ -241,6 +241,7 @@ final class PDOPraticienRepository implements PraticienRepositoryInterface
             ':email' => $praticien->getEmail(),
             ':telephone' => $praticien->getTelephone(),
             ':specialite_id' => $praticien->getSpecialite()->getId(),
+            ':structure_id' => $praticien->getStructureId(),
             ':rpps_id' => $praticien->getRppsId() !== '' ? $praticien->getRppsId() : null,
             ':organisation' => $praticien->isEstOrganisation() ? '1' : '0',
             ':nouveau_patient' => $praticien->isAccepteNouveauPatient() ? '1' : '0',
@@ -258,6 +259,7 @@ final class PDOPraticienRepository implements PraticienRepositoryInterface
                 email = :email,
                 telephone = :telephone,
                 specialite_id = :specialite_id,
+                structure_id = :structure_id,
                 rpps_id = :rpps_id,
                 organisation = CAST(:organisation AS bit(1)),
                 nouveau_patient = CAST(:nouveau_patient AS bit(1)),
@@ -273,6 +275,7 @@ final class PDOPraticienRepository implements PraticienRepositoryInterface
             ':email' => $praticien->getEmail(),
             ':telephone' => $praticien->getTelephone(),
             ':specialite_id' => $praticien->getSpecialite()->getId(),
+            ':structure_id' => $praticien->getStructureId(),
             ':rpps_id' => $praticien->getRppsId() !== '' ? $praticien->getRppsId() : null,
             ':organisation' => $praticien->isEstOrganisation() ? '1' : '0',
             ':nouveau_patient' => $praticien->isAccepteNouveauPatient() ? '1' : '0',

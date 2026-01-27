@@ -6,7 +6,9 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use toubilib\core\application\ports\api\dtos\inputs\InputPraticienDTO;
+use toubilib\core\application\ports\api\dtos\outputs\ProfileDTO;
 use toubilib\core\application\ports\api\servicesInterfaces\ServicePraticienInterface;
+use toubilib\core\domain\entities\Roles;
 use toubilib\infra\adapters\ApiResponseBuilder;
 
 final class CreatePraticienAction
@@ -39,7 +41,36 @@ final class CreatePraticienAction
                 ->build($response);
         }
 
-        $detail = $this->service->createPraticien($input);
+        $auth = $request->getAttribute('authenticated_user');
+        $forcedId = null;
+
+        if ($auth instanceof ProfileDTO) {
+            if ($auth->role !== Roles::PRATICIEN) {
+                return ApiResponseBuilder::create()
+                    ->status(403)
+                    ->error('Forbidden: insufficient permissions')
+                    ->build($response);
+            }
+
+            if (strtolower($auth->email) !== strtolower($input->email)) {
+                return ApiResponseBuilder::create()
+                    ->status(403)
+                    ->error('Forbidden: practitioner email must match authenticated user')
+                    ->build($response);
+            }
+
+            $existing = $this->service->getPraticienDetail($auth->ID);
+            if ($existing !== null) {
+                return ApiResponseBuilder::create()
+                    ->status(409)
+                    ->error('Praticien already exists for this user')
+                    ->build($response);
+            }
+
+            $forcedId = $auth->ID;
+        }
+
+        $detail = $this->service->createPraticien($input, $forcedId);
         $attributes = $detail->jsonSerialize();
         $id = (string)($attributes['id'] ?? '');
         $location = '/api/praticiens/' . $id;

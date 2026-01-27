@@ -16,7 +16,8 @@ final class InputPraticienDTO
         public ?string $rppsId,
         public string $titre,
         public bool $accepteNouveauPatient,
-        public bool $estOrganisation
+        public bool $estOrganisation,
+        public ?string $structureId
     ) {}
 
     public static function fromArray(array $data): self
@@ -30,6 +31,16 @@ final class InputPraticienDTO
         $rppsId = array_key_exists('rppsId', $data) ? trim((string)$data['rppsId']) : null;
         if ($rppsId === '') {
             $rppsId = null;
+        }
+
+        $structureId = null;
+        if (array_key_exists('structureId', $data)) {
+            $structureId = trim((string)$data['structureId']);
+        } elseif (array_key_exists('structure_id', $data)) {
+            $structureId = trim((string)$data['structure_id']);
+        }
+        if ($structureId === '') {
+            $structureId = null;
         }
 
         $specialiteId = $data['specialiteId'] ?? null;
@@ -68,7 +79,8 @@ final class InputPraticienDTO
             $rppsId,
             $titre !== '' ? $titre : 'Dr.',
             (bool)$accepteNouveauPatient,
-            (bool)$estOrganisation
+            (bool)$estOrganisation,
+            $structureId
         );
     }
 

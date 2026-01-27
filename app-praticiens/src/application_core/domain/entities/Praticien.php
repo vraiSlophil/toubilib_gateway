@@ -16,8 +16,22 @@ final class Praticien
     private bool $accepte_nouveau_patient;
     private bool $est_organisation;
     private Specialite $specialite;
+    private ?string $structure_id;
 
-    public function __construct(string $id, string $nom, string $prenom, string $ville, string $email, string $telephone, string $rpps_id, string $titre, bool $accepte_nouveau_patient, bool $est_organisation, Specialite $specialite)
+    public function __construct(
+        string $id,
+        string $nom,
+        string $prenom,
+        string $ville,
+        string $email,
+        string $telephone,
+        string $rpps_id,
+        string $titre,
+        bool $accepte_nouveau_patient,
+        bool $est_organisation,
+        Specialite $specialite,
+        ?string $structure_id = null
+    )
     {
         $this->id = $id;
         $this->nom = $nom;
@@ -30,6 +44,7 @@ final class Praticien
         $this->accepte_nouveau_patient = $accepte_nouveau_patient;
         $this->est_organisation = $est_organisation;
         $this->specialite = $specialite;
+        $this->structure_id = $structure_id;
     }
 
     public function isEstOrganisation(): bool
@@ -140,5 +155,15 @@ final class Praticien
     public function setSpecialite(Specialite $specialite): void
     {
         $this->specialite = $specialite;
+    }
+
+    public function getStructureId(): ?string
+    {
+        return $this->structure_id;
+    }
+
+    public function setStructureId(?string $structure_id): void
+    {
+        $this->structure_id = $structure_id;
     }
 }

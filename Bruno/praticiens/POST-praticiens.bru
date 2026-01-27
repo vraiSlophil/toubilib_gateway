@@ -7,7 +7,7 @@ meta {
 post {
   url: {{API_SRC}}/praticiens
   body: json
-  auth: none
+  auth: inherit
 }
 
 body:json {
@@ -15,13 +15,14 @@ body:json {
     "nom": "Test",
     "prenom": "Praticien",
     "ville": "Nancy",
-    "email": "{{newPraticienEmail}}",
+    "email": "{{patientEmail}}",
     "telephone": "0611223344",
     "specialiteId": {{specialiteId}},
     "rppsId": "123456789",
     "titre": "Dr.",
     "accepteNouveauPatient": true,
-    "estOrganisation": false
+    "estOrganisation": false,
+    "structureId": "a51a0543-ee80-3515-81ab-2504ec194c09"
   }
 }
 

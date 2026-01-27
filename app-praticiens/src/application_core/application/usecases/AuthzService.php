@@ -37,6 +37,11 @@ final class AuthzService implements AuthzServiceInterface
         return $user->role === Roles::PATIENT;
     }
 
+    public function canCreatePraticien(ProfileDTO $user): bool
+    {
+        return $user->role === Roles::PRATICIEN;
+    }
+
     public function canListUserRdvs(ProfileDTO $user): bool
     {
 

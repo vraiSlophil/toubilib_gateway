@@ -53,9 +53,9 @@ final class ServicePraticien implements ServicePraticienInterface
         return array_map(static fn($praticien) => PraticienDTO::fromEntity($praticien), $entities);
     }
 
-    public function createPraticien(InputPraticienDTO $input): PraticienDetailDTO
+    public function createPraticien(InputPraticienDTO $input, ?string $forcedId = null): PraticienDetailDTO
     {
-        $id = Uuid::uuid4()->toString();
+        $id = $forcedId ?? Uuid::uuid4()->toString();
         $specialite = new Specialite($input->specialiteId, '', null);
 
         $praticien = new Praticien(
@@ -69,12 +69,13 @@ final class ServicePraticien implements ServicePraticienInterface
             $input->titre,
             $input->accepteNouveauPatient,
             $input->estOrganisation,
-            $specialite
+            $specialite,
+            $input->structureId
         );
 
         $this->praticienRepository->create($praticien);
 
-        $detail = $this->praticienRepository->findDetailById($id);
+        $detail = $this->praticienRepository->getById($id);
         if ($detail === null) {
             throw new PraticienNotFoundException('Praticien not found after creation');
         }
@@ -84,12 +85,13 @@ final class ServicePraticien implements ServicePraticienInterface
 
     public function updatePraticien(string $id, InputPraticienDTO $input): PraticienDetailDTO
     {
-        $existing = $this->praticienRepository->findDetailById($id);
+        $existing = $this->praticienRepository->getById($id);
         if ($existing === null) {
             throw new PraticienNotFoundException('Praticien not found');
         }
 
         $specialite = new Specialite($input->specialiteId, '', null);
+        $structureId = $input->structureId ?? ($existing->getStructure()?->getId());
         $praticien = new Praticien(
             $id,
             $input->nom,
@@ -101,12 +103,13 @@ final class ServicePraticien implements ServicePraticienInterface
             $input->titre,
             $input->accepteNouveauPatient,
             $input->estOrganisation,
-            $specialite
+            $specialite,
+            $structureId
         );
 
         $this->praticienRepository->update($praticien);
 
-        $detail = $this->praticienRepository->findDetailById($id);
+        $detail = $this->praticienRepository->getById($id);
         if ($detail === null) {
             throw new PraticienNotFoundException('Praticien not found after update');
         }
@@ -116,7 +119,7 @@ final class ServicePraticien implements ServicePraticienInterface
 
     public function deletePraticien(string $id): void
     {
-        $existing = $this->praticienRepository->findDetailById($id);
+        $existing = $this->praticienRepository->getById($id);
         if ($existing === null) {
             throw new PraticienNotFoundException('Praticien not found');
         }

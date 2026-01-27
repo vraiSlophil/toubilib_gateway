@@ -22,7 +22,7 @@ final class PraticienDetailDTO implements JsonSerializable
         public bool          $organisation,
         public bool          $nouveauPatient,
         public SpecialiteDTO $specialite,
-        public StructureDTO  $structure,
+        public ?StructureDTO $structure,
         public array         $motifs,
         public array         $moyens
     )
@@ -44,7 +44,7 @@ final class PraticienDetailDTO implements JsonSerializable
             $praticien->isOrganisation(),
             $praticien->isNouveauPatient(),
             SpecialiteDTO::fromEntity($praticien->getSpecialite()) ?? null,
-            StructureDTO::fromEntity($praticien->getStructure()),
+            $praticien->getStructure() ? StructureDTO::fromEntity($praticien->getStructure()) : null,
             array_map(fn(MotifVisite $m) => MotifVisiteDTO::fromEntity($m), $praticien->getMotifs()),
             array_map(fn(MoyenPaiement $m) => MoyenPaiementDTO::fromEntity($m), $praticien->getMoyens())
         );

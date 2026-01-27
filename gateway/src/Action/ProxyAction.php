@@ -80,9 +80,9 @@ final class ProxyAction
             ]);
         } catch (RequestException $exception) {
             $upstreamResponse = $exception->getResponse();
-            if ($upstreamResponse !== null && $upstreamResponse->getStatusCode() === 404) {
-                throw new HttpNotFoundException($request, 'Resource not found');
-            }
+            // if ($upstreamResponse !== null && $upstreamResponse->getStatusCode() === 404) {
+            //     throw new HttpNotFoundException($request, 'Resource not found');
+            // }
 
             if ($upstreamResponse === null) {
                 throw $exception;

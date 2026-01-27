@@ -23,7 +23,8 @@ return function (App $app): App {
 
         $app->group('/praticiens', function (RouteCollectorProxy $app) {
             $app->get('', ListPraticiensAction::class);
-            $app->post('', CreatePraticienAction::class);
+            $app->post('', CreatePraticienAction::class)
+                ->add(new AuthzMiddleware($app->getContainer()->get(AuthzService::class), 'createPraticien'));
             $app->group('/{praticienId}', function (RouteCollectorProxy $app) {
                 $app->get('', GetPraticienAction::class);
                 $app->put('', UpdatePraticienAction::class);
