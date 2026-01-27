@@ -13,6 +13,7 @@ final class InputRendezVousDTO
         public string $praticienId,
         public string $patientId,
         public ?string $patientEmail,
+        public ?string $praticienEmail,
         public DateTimeImmutable $debut,
         public int $dureeMinutes,
         public string $motifVisite,
@@ -44,10 +45,21 @@ final class InputRendezVousDTO
             throw new InvalidArgumentException('motifVisite is required');
         }
 
+        $patientEmail = array_key_exists('patientEmail', $data) ? trim((string)$data['patientEmail']) : null;
+        if ($patientEmail === '') {
+            $patientEmail = null;
+        }
+
+        $praticienEmail = array_key_exists('praticienEmail', $data) ? trim((string)$data['praticienEmail']) : null;
+        if ($praticienEmail === '') {
+            $praticienEmail = null;
+        }
+
         return new self(
             praticienId: (string)($data['praticienId'] ?? ''),
             patientId: (string)($data['patientId'] ?? ''),
-            patientEmail: array_key_exists('patientEmail', $data) ? (string)$data['patientEmail'] : null,
+            patientEmail: $patientEmail,
+            praticienEmail: $praticienEmail,
             debut: $debut,
             dureeMinutes: (int)$duree,
             motifVisite: $motifVisite,
@@ -58,10 +70,10 @@ final class InputRendezVousDTO
     {
         $errors = [];
 
-        if ($this->praticienId === '') {
+        if ($this->praticienId === '' && $this->praticienEmail === null) {
             $errors['praticienId'] = 'requiered';
         }
-        if ($this->patientId === '') {
+        if ($this->patientId === '' && $this->patientEmail === null) {
             $errors['patientId'] = 'requiered';
         }
         if ($this->dureeMinutes <= 0) {
@@ -69,6 +81,9 @@ final class InputRendezVousDTO
         }
         if ($this->patientEmail !== null && !filter_var($this->patientEmail, FILTER_VALIDATE_EMAIL)) {
             $errors['patientEmail'] = 'invalid email format';
+        }
+        if ($this->praticienEmail !== null && !filter_var($this->praticienEmail, FILTER_VALIDATE_EMAIL)) {
+            $errors['praticienEmail'] = 'invalid email format';
         }
         if ($this->motifVisite === '') {
             $errors['motifVisite'] = 'requiered';

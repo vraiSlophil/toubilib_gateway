@@ -11,6 +11,8 @@ interface PatientRepositoryInterface
 
     public function getById(string $id): ?Patient;
 
+    public function findByEmail(string $email): ?Patient;
+
     public function create(Patient $patient): void;
 
     public function update(Patient $patient): void;

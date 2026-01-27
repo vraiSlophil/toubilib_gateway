@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace toubilib\gateway\Action;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -42,6 +43,9 @@ final class ProxyAction
             case str_starts_with($path, 'api/auth'):
                 $targetClient = $this->authClient;
                 break;
+            case preg_match('#^api/praticiens/[^/]+/rdvs(?:/|$)#', $path) === 1:
+                $targetClient = $this->rdvClient;
+                break;
             case str_starts_with($path, 'api/praticiens'):
                 $targetClient = $this->praticiensClient;
                 break;
@@ -67,11 +71,25 @@ final class ProxyAction
             $bodyStream->rewind();
         }
 
-        $apiResponse = $targetClient->request($method, $upstreamPath, [
-            'headers' => $this->forwardHeaders($request),
-            'body'    => (string) $bodyStream,
-            'query'   => $request->getQueryParams(),
-        ]);
+        try {
+            $apiResponse = $targetClient->request($method, $upstreamPath, [
+                'headers' => $this->forwardHeaders($request),
+                'body' => (string) $bodyStream,
+                'query' => $request->getQueryParams(),
+                'http_errors' => true,
+            ]);
+        } catch (RequestException $exception) {
+            $upstreamResponse = $exception->getResponse();
+            if ($upstreamResponse !== null && $upstreamResponse->getStatusCode() === 404) {
+                throw new HttpNotFoundException($request, 'Resource not found');
+            }
+
+            if ($upstreamResponse === null) {
+                throw $exception;
+            }
+
+            $apiResponse = $upstreamResponse;
+        }
 
         $status = $apiResponse->getStatusCode();
         $apiBody = (string) $apiResponse->getBody();

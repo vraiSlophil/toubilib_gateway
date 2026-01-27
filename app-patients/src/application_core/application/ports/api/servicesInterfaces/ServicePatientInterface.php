@@ -12,6 +12,8 @@ interface ServicePatientInterface
 
     public function getPatientById(string $id): ?PatientDTO;
 
+    public function findPatientByEmail(string $email): ?PatientDTO;
+
     public function createPatient(InputPatientDTO $input, string $patientId, ?string $email): void;
 
     public function updatePatient(string $patientId, InputPatientDTO $input, ?string $email): void;

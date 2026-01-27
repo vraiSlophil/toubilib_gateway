@@ -5,7 +5,6 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use toubilib\api\actions\GetRootAction;
 use toubilib\api\actions\GetPraticienAction;
-use toubilib\api\actions\ListBookedSlotsAction;
 use toubilib\api\actions\ListPraticiensAction;
 use toubilib\api\actions\CreatePraticienAction;
 use toubilib\api\actions\UpdatePraticienAction;
@@ -29,8 +28,6 @@ return function (App $app): App {
                 $app->get('', GetPraticienAction::class);
                 $app->put('', UpdatePraticienAction::class);
                 $app->delete('', DeletePraticienAction::class);
-                $app->get('/rdvs', ListBookedSlotsAction::class)
-                    ->add(new AuthzMiddleware($app->getContainer()->get(AuthzService::class), 'viewAgenda'));
 
                 $app->get('/indisponibilites', ListIndisponibilitesAction::class)
                     ->add(new AuthzMiddleware($app->getContainer()->get(AuthzService::class), 'manageIndisponibilites'));

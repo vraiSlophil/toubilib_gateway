@@ -53,25 +53,6 @@ return [
         ]);
     },
 
-    'db.rdv' => static function (): PDO {
-        $driver = env('RDV_DRIVER', 'pgsql');
-        $host = env('RDV_HOST', 'toubirdv.db');
-        $db = env('RDV_DATABASE', 'toubirdv');
-        $user = env('RDV_USERNAME', 'toubirdv');
-        $pass = env('RDV_PASSWORD', 'toubirdv');
-        $charset = 'utf8mb4';
-
-        $dsn = $driver === 'mysql'
-            ? "mysql:host={$host};dbname={$db};charset={$charset}"
-            : "pgsql:host={$host};dbname={$db}";
-
-        return new PDO($dsn, $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ]);
-    },
-
     MonologLoggerInterface::class => static function ($c) {
         return new MonologLogger($c);
     },

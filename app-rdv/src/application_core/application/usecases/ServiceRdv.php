@@ -55,7 +55,16 @@ final class ServiceRdv implements ServiceRdvInterface
 
     public function creerRdv(InputRendezVousDTO $input): string
     {
-        $praticien = $this->praticienRepository->getById($input->praticienId);
+        $praticien = null;
+        if ($input->praticienId === '' && $input->praticienEmail !== null) {
+            $praticien = $this->praticienRepository->findByEmail($input->praticienEmail);
+            if ($praticien === null) {
+                throw new PraticienNotFoundException('Praticien not found');
+            }
+            $input->praticienId = $praticien->getId();
+        }
+
+        $praticien = $praticien ?? $this->praticienRepository->getById($input->praticienId);
         if ($praticien === null) {
             throw new PraticienNotFoundException('Praticien not found');
         }
@@ -77,9 +86,21 @@ final class ServiceRdv implements ServiceRdvInterface
             throw new PraticienUnavailableException('Praticien unavailable');
         }
 
-        $patient = $this->patientRepository->getById($input->patientId);
+        $patient = null;
+        if ($input->patientId === '' && $input->patientEmail !== null) {
+            $patient = $this->patientRepository->findByEmail($input->patientEmail);
+            if ($patient === null) {
+                throw new PatientNotFoundException('Patient not found');
+            }
+            $input->patientId = $patient->getId();
+        }
+
+        $patient = $patient ?? $this->patientRepository->getById($input->patientId);
         if ($patient === null) {
             throw new PatientNotFoundException('Patient not found');
+        }
+        if ($input->patientEmail === null && $patient->getEmail() !== null) {
+            $input->patientEmail = $patient->getEmail();
         }
 
         $rdv = Rdv::fromInputDTO($input);

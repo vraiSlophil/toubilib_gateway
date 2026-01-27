@@ -21,8 +21,22 @@ final class ListPatientsAction
             return ApiResponseBuilder::create()->status(401)->error('Unauthorized')->build($response);
         }
 
+        $params = $request->getQueryParams();
+        $email = array_key_exists('email', $params) ? trim((string)$params['email']) : null;
+        if ($email === '') {
+            $email = null;
+        }
+        if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ApiResponseBuilder::create()->status(400)->error('email invalide')->build($response);
+        }
+
         if ($user->role === Roles::PRATICIEN) {
-            $patients = $this->service->listPatients();
+            if ($email !== null) {
+                $patient = $this->service->findPatientByEmail($email);
+                $patients = $patient ? [$patient] : [];
+            } else {
+                $patients = $this->service->listPatients();
+            }
         } elseif ($user->role === Roles::PATIENT) {
             $patient = $this->service->getPatientById($user->ID);
             $patients = $patient ? [$patient] : [];
@@ -40,10 +54,15 @@ final class ListPatientsAction
             return ApiResponseBuilder::resource('patients', $id, $attributes, $links);
         }, $patients);
 
+        $self = '/api/patients';
+        if ($email !== null && $user->role === Roles::PRATICIEN) {
+            $self .= '?' . http_build_query(['email' => $email]);
+        }
+
         return ApiResponseBuilder::create()
             ->status(200)
             ->data($data)
-            ->links(['self' => ['href' => '/api/patients']])
+            ->links(['self' => ['href' => $self]])
             ->build($response);
     }
 }

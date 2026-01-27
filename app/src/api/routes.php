@@ -3,92 +3,17 @@ declare(strict_types=1);
 
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
-use toubilib\api\actions\auth\SigninAction;
-use toubilib\api\actions\auth\SignupAction;
-use toubilib\api\actions\auth\RefreshAction;
-use toubilib\api\actions\EditRdvAction;
-use toubilib\api\actions\GetPraticienAction;
-use toubilib\api\actions\GetRdvAction;
-use toubilib\api\actions\CreateRdvAction;
 use toubilib\api\actions\GetRootAction;
-use toubilib\api\actions\ListBookedSlotsAction;
-use toubilib\api\actions\ListPraticiensAction;
-use toubilib\api\actions\CancelRdvAction;
-use toubilib\api\actions\ListRdvsAction;
-use toubilib\api\actions\CreateIndisponibiliteAction;
-use toubilib\api\actions\ListIndisponibilitesAction;
-use toubilib\api\actions\DeleteIndisponibiliteAction;
-use toubilib\api\actions\GetIndisponibiliteAction;
-use toubilib\api\actions\UpdateIndisponibiliteAction;
 use toubilib\api\actions\ListPatientsAction;
 use toubilib\api\actions\GetPatientAction;
 use toubilib\api\actions\CreatePatientAction;
 use toubilib\api\actions\UpdatePatientAction;
 use toubilib\api\actions\DeletePatientAction;
 use toubilib\api\middlewares\AuthnMiddleware;
-use toubilib\api\middlewares\AuthzMiddleware;
-use toubilib\core\application\usecases\AuthzService;
 
 return function (App $app): App {
     $app->group('/api', function (RouteCollectorProxy $app) {
         $app->get('/', GetRootAction::class);
-
-        // NOTE TD2.2 Ex2:
-        // L'authentification est extraite dans le microservice `api.auth`.
-        // En pratique, ces routes doivent être consommées via la gateway (qui route /api/auth/* vers `api.auth`).
-        // Elles restent ici pour compatibilité / debug local.
-        $app->post('/auth/signin', SigninAction::class);
-        $app->post('/auth/signup', SignupAction::class);
-        $app->post('/auth/refresh', RefreshAction::class);
-
-
-        $app->group('/praticiens', function (RouteCollectorProxy $app) {
-            $app->get('', ListPraticiensAction::class);
-            $app->group('/{praticienId}', function (RouteCollectorProxy $app) {
-                $c = $app->getContainer();
-
-                $app->get('', GetPraticienAction::class);
-                $app->get('/rdvs', ListBookedSlotsAction::class)
-                    ->add(new AuthzMiddleware($c->get(AuthzService::class), 'viewAgenda'))
-                    ->add(AuthnMiddleware::class);
-
-                // Routes for indisponibilites
-                $app->get('/indisponibilites', ListIndisponibilitesAction::class)
-                    ->add(new AuthzMiddleware($c->get(AuthzService::class), 'manageIndisponibilites'))
-                    ->add(AuthnMiddleware::class);
-                $app->post('/indisponibilites', CreateIndisponibiliteAction::class)
-                    ->add(new AuthzMiddleware($c->get(AuthzService::class), 'manageIndisponibilites'))
-                    ->add(AuthnMiddleware::class);
-                $app->get('/indisponibilites/{indispoId}', GetIndisponibiliteAction::class)
-                    ->add(new AuthzMiddleware($c->get(AuthzService::class), 'manageIndisponibilites'))
-                    ->add(AuthnMiddleware::class);
-                $app->put('/indisponibilites/{indispoId}', UpdateIndisponibiliteAction::class)
-                    ->add(new AuthzMiddleware($c->get(AuthzService::class), 'manageIndisponibilites'))
-                    ->add(AuthnMiddleware::class);
-                $app->delete('/indisponibilites/{indispoId}', DeleteIndisponibiliteAction::class)
-                    ->add(new AuthzMiddleware($c->get(AuthzService::class), 'manageIndisponibilites'))
-                    ->add(AuthnMiddleware::class);
-            });
-        });
-
-
-        $app->group('/rdvs', function (RouteCollectorProxy $app) {
-            $c = $app->getContainer();
-
-            $app->get('', ListRdvsAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'listRdvs'));
-//            $app->get('/history', ListRdvsAction::class)
-//                ->add(new AuthzMiddleware($app->getContainer()->get(AuthzService::class), 'listRdvs'))
-//                ->add(AuthnMiddleware::class);
-            $app->get('/{rdvId}', GetRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'viewRdv'));
-            $app->patch('/{rdvId}', EditRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'editRdv'));
-            $app->post('', CreateRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'createRdv'));
-            $app->delete('/{rdvId}', CancelRdvAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'cancelRdv'));
-        })->add(AuthnMiddleware::class);
 
         $app->group('/patients', function (RouteCollectorProxy $app) {
             $app->get('', ListPatientsAction::class);
@@ -99,7 +24,6 @@ return function (App $app): App {
                 $app->delete('', DeletePatientAction::class);
             });
         })->add(AuthnMiddleware::class);
-//        })->add(AuthnMiddleware::class);
     });
 
     return $app;

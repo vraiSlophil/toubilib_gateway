@@ -59,6 +59,27 @@ final class HttpPatientRepository implements PatientRepositoryInterface
         return $this->hydratePatient($resource);
     }
 
+    public function findByEmail(string $email): ?Patient
+    {
+        $resp = $this->client->get('patients', [
+            'query' => ['email' => $email],
+            'headers' => $this->authHeaders(),
+        ]);
+
+        $data = json_decode((string) $resp->getBody(), true);
+        $items = $data['data'] ?? [];
+        if (!is_array($items) || $items === []) {
+            return null;
+        }
+
+        $resource = $items[0];
+        if (!is_array($resource)) {
+            return null;
+        }
+
+        return $this->hydratePatient($resource);
+    }
+
     public function create(Patient $patient): void
     {
         $this->client->post('patients', [

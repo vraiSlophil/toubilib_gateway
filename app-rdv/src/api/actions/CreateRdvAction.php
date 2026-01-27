@@ -49,16 +49,28 @@ final class CreateRdvAction
                 ->build($response);
         }
 
+        $payload = $parsed;
         if ($user->role === Roles::PATIENT) {
-            $payload = array_merge($parsed, [
+            $payload = array_merge($payload, [
                 'patientId' => $user->ID,
                 'patientEmail' => $user->email,
             ]);
         } else {
-            // Practitioners can create an appointment for a patient
-            $payload = array_merge($parsed, [
-                'praticienId' => $user->ID,
-            ]);
+            if (array_key_exists('praticienId', $payload) && (string)$payload['praticienId'] !== $user->ID) {
+                return ApiResponseBuilder::create()
+                    ->status(403)
+                    ->error('Practitioner cannot create an appointment for another practitioner.')
+                    ->build($response);
+            }
+            if (array_key_exists('praticienEmail', $payload) && (string)$payload['praticienEmail'] !== $user->email) {
+                return ApiResponseBuilder::create()
+                    ->status(403)
+                    ->error('Practitioner cannot create an appointment for another practitioner.')
+                    ->build($response);
+            }
+            // Practitioners can create an appointment for a patient, but always as themselves
+            $payload['praticienId'] = $user->ID;
+            unset($payload['praticienEmail']);
         }
 
         try {

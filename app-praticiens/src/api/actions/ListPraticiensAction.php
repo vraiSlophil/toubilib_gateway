@@ -15,23 +15,40 @@ final class ListPraticiensAction
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $params = $request->getQueryParams();
+
+        $email = array_key_exists('email', $params) ? trim((string)$params['email']) : null;
+        if ($email === '') {
+            $email = null;
+        }
+        if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ApiResponseBuilder::create()->status(400)->error('email invalide')->build($response);
+        }
+
         $specialiteId = null;
-        if (array_key_exists('specialiteId', $params) && $params['specialiteId'] !== '') {
-            $specialiteId = filter_var($params['specialiteId'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-            if ($specialiteId === false) {
-                return ApiResponseBuilder::create()->status(400)->error('specialiteId invalide')->build($response);
+        $ville = null;
+        if ($email === null) {
+            if (array_key_exists('specialiteId', $params) && $params['specialiteId'] !== '') {
+                $specialiteId = filter_var($params['specialiteId'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+                if ($specialiteId === false) {
+                    return ApiResponseBuilder::create()->status(400)->error('specialiteId invalide')->build($response);
+                }
+            }
+
+            $ville = array_key_exists('ville', $params) ? trim((string)$params['ville']) : null;
+            if ($ville === '') {
+                $ville = null;
             }
         }
 
-        $ville = array_key_exists('ville', $params) ? trim((string)$params['ville']) : null;
-        if ($ville === '') {
-            $ville = null;
-        }
-
         try {
-            $praticiens = ($specialiteId !== null || $ville !== null)
-                ? $this->service->rechercherPraticiens($specialiteId, $ville)
-                : $this->service->listerPraticiens();
+            if ($email !== null) {
+                $praticien = $this->service->findPraticienByEmail($email);
+                $praticiens = $praticien ? [$praticien] : [];
+            } else {
+                $praticiens = ($specialiteId !== null || $ville !== null)
+                    ? $this->service->rechercherPraticiens($specialiteId, $ville)
+                    : $this->service->listerPraticiens();
+            }
 
             $items = array_map(static function ($dto) {
                 $attributes = $dto->jsonSerialize();
@@ -45,11 +62,15 @@ final class ListPraticiensAction
             }, $praticiens);
 
             $query = [];
-            if ($specialiteId !== null) {
-                $query['specialiteId'] = $specialiteId;
-            }
-            if ($ville !== null) {
-                $query['ville'] = $ville;
+            if ($email !== null) {
+                $query['email'] = $email;
+            } else {
+                if ($specialiteId !== null) {
+                    $query['specialiteId'] = $specialiteId;
+                }
+                if ($ville !== null) {
+                    $query['ville'] = $ville;
+                }
             }
             $self = '/api/praticiens';
             if ($query) {

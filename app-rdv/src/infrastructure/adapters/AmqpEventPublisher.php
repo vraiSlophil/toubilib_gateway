@@ -12,18 +12,16 @@ final class AmqpEventPublisher implements EventPublisherInterface
 {
     private AMQPStreamConnection $connection;
     private string $exchange;
-    private string $queue;
     /** @var array<string, string> */
     private array $routingKeys;
 
     /**
      * @param array<string, string> $routingKeys
      */
-    public function __construct(AMQPStreamConnection $connection, string $exchange, string $queue, array $routingKeys)
+    public function __construct(AMQPStreamConnection $connection, string $exchange, array $routingKeys)
     {
         $this->connection = $connection;
         $this->exchange = $exchange;
-        $this->queue = $queue;
         if ($routingKeys === []) {
             throw new RuntimeException('Routing key mapping cannot be empty.');
         }
@@ -41,8 +39,6 @@ final class AmqpEventPublisher implements EventPublisherInterface
 
         $exchangeType = getenv('RABBITMQ_EXCHANGE_TYPE') ?: 'direct';
         $channel->exchange_declare($this->exchange, $exchangeType, false, true, false);
-        $channel->queue_declare($this->queue, false, false, false, false);
-        $channel->queue_bind($this->queue, $this->exchange, $routingKey);
 
         // Ajout d'un horodatage au payload
         $payload['event'] = $eventName;

@@ -12,6 +12,8 @@ interface ServicePraticienInterface
 
     public function getPraticienDetail(string $id): ?PraticienDetailDTO;
 
+    public function findPraticienByEmail(string $email): ?PraticienDTO;
+
     /** @return PraticienDTO[] */
     public function rechercherPraticiens(?int $specialiteId, ?string $ville): array;
 

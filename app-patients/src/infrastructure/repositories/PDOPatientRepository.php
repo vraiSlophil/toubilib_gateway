@@ -35,6 +35,18 @@ final class PDOPatientRepository implements PatientRepositoryInterface
         return $row ? $this->map($row) : null;
     }
 
+    public function findByEmail(string $email): ?Patient
+    {
+        $sql = 'SELECT id, nom, prenom, date_naissance, adresse, code_postal, ville, email, telephone
+                FROM patient WHERE LOWER(email) = LOWER(:email)
+                LIMIT 1';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? $this->map($row) : null;
+    }
+
     public function create(Patient $patient): void
     {
         $sql = 'INSERT INTO patient (id, nom, prenom, date_naissance, adresse, code_postal, ville, email, telephone)

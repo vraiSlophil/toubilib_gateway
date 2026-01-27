@@ -12,6 +12,8 @@ interface PraticienRepositoryInterface
 
     public function getById(string $id): ?PraticienDetail;
 
+    public function findByEmail(string $email): ?PraticienDetail;
+
     /** @return Praticien[] */
     public function searchPraticiens(?int $specialiteId, ?string $ville): array;
 

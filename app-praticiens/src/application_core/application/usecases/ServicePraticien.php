@@ -41,6 +41,12 @@ final class ServicePraticien implements ServicePraticienInterface
         return $detail ? PraticienDetailDTO::fromEntity($detail) : null;
     }
 
+    public function findPraticienByEmail(string $email): ?PraticienDTO
+    {
+        $praticien = $this->praticienRepository->findByEmail($email);
+        return $praticien ? PraticienDTO::fromEntity($praticien) : null;
+    }
+
     public function rechercherPraticiens(?int $specialiteId, ?string $ville): array
     {
         $entities = $this->praticienRepository->searchPraticiens($specialiteId, $ville);

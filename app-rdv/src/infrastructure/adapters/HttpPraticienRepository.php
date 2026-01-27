@@ -63,6 +63,32 @@ final class HttpPraticienRepository implements PraticienRepositoryInterface
         return $this->hydratePraticienDetail($resource);
     }
 
+    public function findByEmail(string $email): ?PraticienDetail
+    {
+        $resp = $this->client->get('praticiens', [
+            'query' => ['email' => $email],
+            'headers' => $this->authHeaders(),
+        ]);
+        $data = json_decode((string) $resp->getBody(), true);
+        $items = $data['data'] ?? [];
+
+        if (!is_array($items) || $items === []) {
+            return null;
+        }
+
+        $resource = $items[0];
+        if (!is_array($resource)) {
+            return null;
+        }
+
+        $praticien = $this->hydratePraticien($resource);
+        if ($praticien === null) {
+            return null;
+        }
+
+        return $this->getById($praticien->getId());
+    }
+
     /** @return Praticien[] */
     public function searchPraticiens(?int $specialiteId, ?string $ville): array
     {

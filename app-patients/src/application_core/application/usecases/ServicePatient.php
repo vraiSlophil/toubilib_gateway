@@ -27,6 +27,12 @@ final class ServicePatient implements ServicePatientInterface
         return $patient ? PatientDTO::fromEntity($patient) : null;
     }
 
+    public function findPatientByEmail(string $email): ?PatientDTO
+    {
+        $patient = $this->patientRepository->findByEmail($email);
+        return $patient ? PatientDTO::fromEntity($patient) : null;
+    }
+
     public function createPatient(InputPatientDTO $input, string $patientId, ?string $email): void
     {
         $patient = new Patient(

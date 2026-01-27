@@ -5,14 +5,12 @@ use toubilib\api\actions\ListPraticiensAction;
 use toubilib\api\actions\CreatePraticienAction;
 use toubilib\api\actions\UpdatePraticienAction;
 use toubilib\api\actions\DeletePraticienAction;
-use toubilib\api\actions\ListBookedSlotsAction;
 use toubilib\api\actions\CreateIndisponibiliteAction;
 use toubilib\api\actions\ListIndisponibilitesAction;
 use toubilib\api\actions\DeleteIndisponibiliteAction;
 use toubilib\api\actions\GetIndisponibiliteAction;
 use toubilib\api\actions\UpdateIndisponibiliteAction;
 use toubilib\core\application\ports\api\servicesInterfaces\ServicePraticienInterface;
-use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\application\usecases\ServiceIndisponibilite;
 
 return [
@@ -43,12 +41,6 @@ return [
     DeletePraticienAction::class => static function ($c) {
         return new DeletePraticienAction(
             $c->get(ServicePraticienInterface::class)
-        );
-    },
-
-    ListBookedSlotsAction::class => static function ($c) {
-        return new ListBookedSlotsAction(
-            $c->get(ServiceRdvInterface::class)
         );
     },
 

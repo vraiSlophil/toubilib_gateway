@@ -5,13 +5,11 @@ namespace toubilib\core\application\usecases;
 use toubilib\core\application\ports\api\dtos\outputs\ProfileDTO;
 use toubilib\core\application\ports\api\servicesInterfaces\AuthzServiceInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
-use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
 use toubilib\core\domain\entities\Roles;
 
 final class AuthzService implements AuthzServiceInterface
 {
     public function __construct(
-        private RdvRepositoryInterface $rdvRepository,
         private MonologLoggerInterface $monologLogger
     ) {}
 
@@ -26,20 +24,7 @@ final class AuthzService implements AuthzServiceInterface
 
     public function canAccessRdvDetails(ProfileDTO $user, string $rdvId): bool
     {
-        if ($rdvId === '') {
-            return false;
-        }
-
-        $rdv = $this->rdvRepository->getById($rdvId);
-        if ($rdv === null) {
-            return false;
-        }
-
-        return match ($user->role) {
-            Roles::PRATICIEN => $rdv->getPraticienId() === $user->ID,
-            Roles::PATIENT => $rdv->getPatientId() === $user->ID,
-            default => false,
-        };
+        return false;
     }
 
     public function canCancelRdv(ProfileDTO $user, string $rdvId): bool
@@ -62,16 +47,7 @@ final class AuthzService implements AuthzServiceInterface
 
     public function canEditRdv(ProfileDTO $user, string $rdvId): bool
     {
-        if ($rdvId === '' || $user->role !== Roles::PRATICIEN) {
-            return false;
-        }
-
-        $rdv = $this->rdvRepository->getById($rdvId);
-        if ($rdv === null) {
-            return false;
-        }
-
-        return $rdv->getPraticienId() === $user->ID;
+        return false;
     }
 
     public function canManageIndisponibilites(ProfileDTO $user, string $praticienId): bool
