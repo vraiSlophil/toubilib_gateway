@@ -5,9 +5,9 @@ meta {
 }
 
 get {
-  url: {{API_SRC}}/praticiens
+  url: {{API_SRC}}/praticiens?email={{praticienEmail}}
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {
