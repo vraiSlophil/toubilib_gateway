@@ -25,6 +25,7 @@ composer.lock
 /.github/
 
 /docs/*
+!/docs/ROUTES.md
 arbo.txt
 
 /rabbitmq.toubi/

@@ -23,21 +23,21 @@ services:
     command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service api.toubilib : api pour la prise de rdv
-  api.toubilib:
-    build:
-      context: build
-      dockerfile: 8.4-cli.Dockerfile
-    volumes:
-      - ./app:/var/php
-      - ./.env:/var/php/config/.env:ro
-    working_dir: /var/php
-    networks:
-      - toubilib.net
-    depends_on:
-      - toubiauth.db
-      - toubipat.db
-    env_file: ./.env
-    command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
+  # api.toubilib:
+  #   build:
+  #     context: build
+  #     dockerfile: 8.4-cli.Dockerfile
+  #   volumes:
+  #     - ./app:/var/php
+  #     - ./.env:/var/php/config/.env:ro
+  #   working_dir: /var/php
+  #   networks:
+  #     - toubilib.net
+  #   depends_on:
+  #     - toubiauth.db
+  #     - toubipat.db
+  #   env_file: ./.env
+  #   command: sh -c "composer install && php -S 0.0.0.0:80 -t /var/php/public"
 
   # service microservice praticiens
   api.praticiens:
