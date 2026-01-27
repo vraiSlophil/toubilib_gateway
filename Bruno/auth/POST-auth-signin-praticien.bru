@@ -20,11 +20,13 @@ body:json {
 script:post-response {
   let body = res.getBody();
   if (body.errors) return;
-  bru.setEnvVar("accessToken", body.data.attributes.accessToken);
-  bru.setEnvVar("refreshToken", body.data.attributes.refreshToken);
+  bru.setEnvVar("accessToken", body.data.attributes.accessToken, { persist: true });
+  bru.setEnvVar("refreshToken", body.data.attributes.refreshToken, { persist: true });
   if (body.data.attributes.profile?.id) {
-    bru.setEnvVar("profileId", body.data.id);
+    bru.setEnvVar("profileId", body.data.id, { persist: true });
   }
+  
+  bru.saveEnvironment();
 }
 
 settings {
