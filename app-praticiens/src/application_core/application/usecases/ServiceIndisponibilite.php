@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use toubilib\core\application\ports\api\dtos\inputs\InputIndisponibiliteDTO;
 use toubilib\core\application\ports\api\dtos\outputs\IndisponibiliteDTO;
 use toubilib\core\application\ports\spi\repositoryInterfaces\IndisponibiliteRepositoryInterface;
+use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
 use toubilib\core\domain\entities\Indisponibilite;
 use toubilib\core\domain\exceptions\IndisponibiliteConflictException;
 use toubilib\core\domain\exceptions\IndisponibiliteNotFoundException;
@@ -13,12 +14,26 @@ use toubilib\core\domain\exceptions\IndisponibiliteNotFoundException;
 final class ServiceIndisponibilite
 {
     public function __construct(
-        private IndisponibiliteRepositoryInterface $indisponibiliteRepository
+        private IndisponibiliteRepositoryInterface $indisponibiliteRepository,
+        private RdvRepositoryInterface $rdvRepository
     ) {
     }
 
     public function creerIndisponibilite(InputIndisponibiliteDTO $input): string
     {
+        // Check if there are any existing RDVs in this period
+        $existingRdvs = $this->rdvRepository->listForPraticienBetween(
+            $input->praticienId,
+            $input->debut,
+            $input->fin
+        );
+
+        if (count($existingRdvs) > 0) {
+            throw new IndisponibiliteConflictException(
+                'Cannot create indisponibilite: existing appointments in this period'
+            );
+        }
+
         // Check if there are conflicting indisponibilites
         $existingIndispos = $this->indisponibiliteRepository->listForPraticienBetween(
             $input->praticienId,
@@ -76,6 +91,17 @@ final class ServiceIndisponibilite
         }
         if ($existing->getPraticienId() !== $input->praticienId) {
             throw new IndisponibiliteNotFoundException('Indisponibilite not found');
+        }
+
+        $existingRdvs = $this->rdvRepository->listForPraticienBetween(
+            $input->praticienId,
+            $input->debut,
+            $input->fin
+        );
+        if (count($existingRdvs) > 0) {
+            throw new IndisponibiliteConflictException(
+                'Cannot update indisponibilite: existing appointments in this period'
+            );
         }
 
         $existingIndispos = $this->indisponibiliteRepository->listForPraticienBetween(

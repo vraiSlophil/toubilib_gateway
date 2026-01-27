@@ -43,9 +43,6 @@ final class ProxyAction
             case str_starts_with($path, 'api/auth'):
                 $targetClient = $this->authClient;
                 break;
-            case preg_match('#^api/praticiens/[^/]+/rdvs(?:/|$)#', $path) === 1:
-                $targetClient = $this->rdvClient;
-                break;
             case str_starts_with($path, 'api/praticiens'):
                 $targetClient = $this->praticiensClient;
                 break;

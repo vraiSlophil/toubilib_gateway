@@ -1,5 +1,6 @@
 <?php
 
+use GuzzleHttp\Client;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
 use toubilib\infra\adapters\MonologLogger;
 
@@ -50,6 +51,16 @@ return [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
+        ]);
+    },
+
+    // Client HTTP vers microservice RDV
+    'client.rdv' => static function ($c) {
+        $baseUri = getenv('RDV_API_BASE_URI') ?: 'http://api.rdv:80/api/';
+        return new Client([
+            'base_uri' => rtrim($baseUri, '/') . '/',
+            'http_errors' => false,
+            'timeout' => 10.0,
         ]);
     },
 

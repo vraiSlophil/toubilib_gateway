@@ -10,6 +10,7 @@ use toubilib\api\providers\auth\JwtPayloadDecoder;
 use toubilib\core\application\ports\api\dtos\outputs\ProfileDTO;
 use toubilib\core\application\usecases\AuthzService;
 use toubilib\infra\adapters\ApiResponseBuilder;
+use toubilib\infra\adapters\AuthHeaderProvider;
 
 final class AuthzMiddleware
 {
@@ -18,7 +19,8 @@ final class AuthzMiddleware
     public function __construct(
         private AuthzService $authzService,
         private string       $operation,
-        ?JwtPayloadDecoder   $decoder = null
+        ?JwtPayloadDecoder   $decoder = null,
+        private ?AuthHeaderProvider $authHeaderProvider = null
     )
     {
         $this->decoder = $decoder ?? new JwtPayloadDecoder();
@@ -27,9 +29,10 @@ final class AuthzMiddleware
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler)
     {
         $auth = $request->getAttribute('authenticated_user');
+        $authorization = $request->getHeaderLine('Authorization');
+        $this->authHeaderProvider?->setAuthorization($authorization);
 
         if (!$auth) {
-            $authorization = $request->getHeaderLine('Authorization');
             if ($authorization === '') {
                 return $this->unauthorized('Missing Authorization header');
             }

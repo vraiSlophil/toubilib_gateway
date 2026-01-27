@@ -5,7 +5,6 @@ use toubilib\api\actions\GetRdvAction;
 use toubilib\api\actions\CreateRdvAction;
 use toubilib\api\actions\GetRootAction;
 use toubilib\api\actions\CancelRdvAction;
-use toubilib\api\actions\ListBookedSlotsAction;
 use toubilib\api\actions\ListRdvsAction;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
@@ -17,12 +16,6 @@ return [
 
     ListRdvsAction::class => static function ($c) {
         return new ListRdvsAction(
-            $c->get(ServiceRdvInterface::class)
-        );
-    },
-
-    ListBookedSlotsAction::class => static function ($c) {
-        return new ListBookedSlotsAction(
             $c->get(ServiceRdvInterface::class)
         );
     },

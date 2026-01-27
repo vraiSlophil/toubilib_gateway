@@ -8,7 +8,6 @@ use toubilib\api\actions\GetRdvAction;
 use toubilib\api\actions\CreateRdvAction;
 use toubilib\api\actions\GetRootAction;
 use toubilib\api\actions\CancelRdvAction;
-use toubilib\api\actions\ListBookedSlotsAction;
 use toubilib\api\actions\ListRdvsAction;
 use toubilib\api\middlewares\AuthzMiddleware;
 use toubilib\core\application\usecases\AuthzService;
@@ -17,13 +16,6 @@ use toubilib\infra\adapters\AuthHeaderProvider;
 return function (App $app): App {
     $app->group('/api', function (RouteCollectorProxy $app) {
         $app->get('/', GetRootAction::class);
-
-        $app->group('/praticiens', function (RouteCollectorProxy $app) {
-            $c = $app->getContainer();
-
-            $app->get('/{praticienId}/rdvs', ListBookedSlotsAction::class)
-                ->add(new AuthzMiddleware($c->get(AuthzService::class), 'viewAgenda', null, $c->get(AuthHeaderProvider::class)));
-        });
 
         $app->group('/rdvs', function (RouteCollectorProxy $app) {
             $c = $app->getContainer();

@@ -1,5 +1,6 @@
 <?php
 
+use toubilib\api\actions\GetRootAction;
 use toubilib\api\actions\ListPatientsAction;
 use toubilib\api\actions\GetPatientAction;
 use toubilib\api\actions\CreatePatientAction;
@@ -8,6 +9,10 @@ use toubilib\api\actions\DeletePatientAction;
 use toubilib\core\application\ports\api\servicesInterfaces\ServicePatientInterface;
 
 return [
+    GetRootAction::class => static function () {
+        return new GetRootAction();
+    },
+
     ListPatientsAction::class => static function ($c) {
         return new ListPatientsAction(
             $c->get(ServicePatientInterface::class)
