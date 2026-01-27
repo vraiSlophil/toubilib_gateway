@@ -1,0 +1,38 @@
+meta {
+  name: POST-praticiens
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_SRC}}/praticiens
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nom": "Test",
+    "prenom": "Praticien",
+    "ville": "Nancy",
+    "email": "{{newPraticienEmail}}",
+    "telephone": "0611223344",
+    "specialiteId": {{specialiteId}},
+    "rppsId": "123456789",
+    "titre": "Dr.",
+    "accepteNouveauPatient": true,
+    "estOrganisation": false
+  }
+}
+
+script:post-response {
+  let body = res.getBody();
+  if (body.data?.id) {
+    bru.setEnvVar("newPraticienId", body.data.id);
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

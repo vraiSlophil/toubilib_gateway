@@ -1,7 +1,7 @@
 meta {
-  name: GET-praticiens
+  name: GET-praticiens-email
   type: http
-  seq: 2
+  seq: 3
 }
 
 get {
@@ -11,8 +11,7 @@ get {
 }
 
 params:query {
-  ~specialiteId: 2
-  ~ville: nancy
+  email: {{praticienEmail}}
 }
 
 settings {

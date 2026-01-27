@@ -1,0 +1,31 @@
+meta {
+  name: PUT-praticiens-id
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{API_SRC}}/praticiens/{{newPraticienId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nom": "Test",
+    "prenom": "Praticien Modifié",
+    "ville": "Nancy",
+    "email": "{{newPraticienEmail}}",
+    "telephone": "0611223355",
+    "specialiteId": {{specialiteId}},
+    "rppsId": "123456789",
+    "titre": "Dr.",
+    "accepteNouveauPatient": true,
+    "estOrganisation": false
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

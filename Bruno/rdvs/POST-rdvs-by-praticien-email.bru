@@ -1,7 +1,7 @@
 meta {
-  name: POST-rdvs
+  name: POST-rdvs-by-praticien-email
   type: http
-  seq: 3
+  seq: 5
 }
 
 post {
@@ -12,8 +12,8 @@ post {
 
 body:json {
   {
-    "praticienId": "{{praticienId}}",
-    "debut": "2026-02-12T14:30:00+00:00",
+    "praticienEmail": "{{praticienEmail}}",
+    "debut": "2026-02-12T15:00:00+00:00",
     "dureeMinutes": 10,
     "motifVisite": "Imagerie médicale"
   }

@@ -1,19 +1,18 @@
 meta {
-  name: POST-auth-signup
+  name: POST-tokens-validate
   type: http
-  seq: 3
+  seq: 5
 }
 
 post {
-  url: {{API_SRC}}/auth/signup
+  url: {{API_SRC}}/tokens/validate
   body: json
   auth: none
 }
 
 body:json {
   {
-    "email": "{{patientEmail}}",
-    "password": "P@ssw0rd"
+    "token": "{{accessToken}}"
   }
 }
 

@@ -1,18 +1,17 @@
 meta {
-  name: GET-praticiens
+  name: GET-patients-email
   type: http
   seq: 2
 }
 
 get {
-  url: {{API_SRC}}/praticiens
+  url: {{API_SRC}}/patients
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {
-  ~specialiteId: 2
-  ~ville: nancy
+  email: {{patientEmail}}
 }
 
 settings {

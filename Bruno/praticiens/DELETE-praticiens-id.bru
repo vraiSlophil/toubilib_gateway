@@ -1,13 +1,13 @@
 meta {
-  name: DELETE-patients-id
+  name: DELETE-praticiens-id
   type: http
   seq: 6
 }
 
 delete {
-  url: {{API_SRC}}/patients/{{patientId}}
+  url: {{API_SRC}}/praticiens/{{newPraticienId}}
   body: none
-  auth: inherit
+  auth: none
 }
 
 settings {
