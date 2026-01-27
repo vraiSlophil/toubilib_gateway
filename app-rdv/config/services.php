@@ -10,7 +10,6 @@ use toubilib\core\application\ports\spi\repositoryInterfaces\PatientRepositoryIn
 use toubilib\core\application\usecases\AuthzService;
 use toubilib\core\application\usecases\ServicePraticien;
 use toubilib\core\application\usecases\ServiceRdv;
-use toubilib\core\application\usecases\ServiceIndisponibilite;
 use toubilib\infra\repositories\PDORdvRepository;
 use toubilib\infra\repositories\PDOIndisponibiliteRepository;
 use toubilib\infra\adapters\MonologLogger;
@@ -34,20 +33,13 @@ if (!function_exists('env')) {
 }
 
 return [
-    // --- Services ---
+        // --- Services ---
     MonologLoggerInterface::class => static function ($c) {
         return new MonologLogger($c);
     },
 
     AuthHeaderProvider::class => static function () {
         return new AuthHeaderProvider();
-    },
-
-    ServicePraticienInterface::class => static function ($c) {
-        return new ServicePraticien(
-            $c->get(PraticienRepositoryInterface::class),
-            $c->get(MonologLoggerInterface::class)
-        );
     },
 
     ServiceRdvInterface::class => static function ($c) {
@@ -64,14 +56,7 @@ return [
         return new AuthzService($c->get(RdvRepositoryInterface::class), $c->get(MonologLoggerInterface::class));
     },
 
-    ServiceIndisponibilite::class => static function ($c) {
-        return new ServiceIndisponibilite(
-            $c->get(IndisponibiliteRepositoryInterface::class),
-            $c->get(RdvRepositoryInterface::class)
-        );
-    },
-
-    // --- Repositories ---
+        // --- Repositories ---
     PraticienRepositoryInterface::class => static function ($c) {
         return new HttpPraticienRepository(
             $c->get('client.praticiens'),
