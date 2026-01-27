@@ -10,6 +10,7 @@ use toubilib\core\application\ports\api\dtos\outputs\RendezVousDTO;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
 use toubilib\core\application\ports\spi\event\EventPublisherInterface;
+use toubilib\core\application\ports\spi\repositoryInterfaces\IndisponibiliteRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PatientRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PraticienRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
@@ -29,6 +30,7 @@ final class ServiceRdv implements ServiceRdvInterface
         private RdvRepositoryInterface       $rdvRepository,
         private PraticienRepositoryInterface $praticienRepository,
         private PatientRepositoryInterface   $patientRepository,
+        private IndisponibiliteRepositoryInterface $indisponibiliteRepository,
         private EventPublisherInterface      $eventPublisher,
         private MonologLoggerInterface       $logger
     )
@@ -70,6 +72,15 @@ final class ServiceRdv implements ServiceRdvInterface
         }
 
         $fin = $input->debut->modify('+' . $input->dureeMinutes . ' minutes');
+
+        $indisponibilites = $this->indisponibiliteRepository->listForPraticienBetween(
+            $input->praticienId,
+            $input->debut,
+            $fin
+        );
+        if ($indisponibilites !== []) {
+            throw new PraticienUnavailableException('Praticien unavailable during this period');
+        }
 
         $existants = $this->rdvRepository->listForPraticienBetween(
             $input->praticienId,

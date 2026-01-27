@@ -68,6 +68,7 @@ final class AuthzMiddleware
             'createRdv' => $this->authzService->canCreateRdv($auth),
             'createPraticien' => $this->authzService->canCreatePraticien($auth),
             'listRdvs' => $this->authzService->canListUserRdvs($auth),
+            'viewIndisponibilites' => $this->authzService->canViewIndisponibilites($auth, $praticienId),
             'manageIndisponibilites' => $this->authzService->canManageIndisponibilites($auth, $praticienId),
             default => false
         };

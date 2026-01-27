@@ -13,7 +13,7 @@ use toubilib\api\actions\GetIndisponibiliteAction;
 use toubilib\api\actions\UpdateIndisponibiliteAction;
 use toubilib\core\application\ports\api\servicesInterfaces\ServicePraticienInterface;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
-use toubilib\core\application\usecases\ServiceIndisponibilite;
+use toubilib\core\application\ports\api\servicesInterfaces\ServiceIndisponibiliteInterface;
 
 return [
     ListPraticiensAction::class => static function ($c) {
@@ -54,31 +54,31 @@ return [
 
     CreateIndisponibiliteAction::class => static function ($c) {
         return new CreateIndisponibiliteAction(
-            $c->get(ServiceIndisponibilite::class)
+            $c->get(ServiceIndisponibiliteInterface::class)
         );
     },
 
     ListIndisponibilitesAction::class => static function ($c) {
         return new ListIndisponibilitesAction(
-            $c->get(ServiceIndisponibilite::class)
+            $c->get(ServiceIndisponibiliteInterface::class)
         );
     },
 
     DeleteIndisponibiliteAction::class => static function ($c) {
         return new DeleteIndisponibiliteAction(
-            $c->get(ServiceIndisponibilite::class)
+            $c->get(ServiceIndisponibiliteInterface::class)
         );
     },
 
     GetIndisponibiliteAction::class => static function ($c) {
         return new GetIndisponibiliteAction(
-            $c->get(ServiceIndisponibilite::class)
+            $c->get(ServiceIndisponibiliteInterface::class)
         );
     },
 
     UpdateIndisponibiliteAction::class => static function ($c) {
         return new UpdateIndisponibiliteAction(
-            $c->get(ServiceIndisponibilite::class)
+            $c->get(ServiceIndisponibiliteInterface::class)
         );
     },
 

@@ -6,14 +6,14 @@ use DateTimeImmutable;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use toubilib\core\application\ports\api\dtos\inputs\InputIndisponibiliteDTO;
-use toubilib\core\application\usecases\ServiceIndisponibilite;
+use toubilib\core\application\ports\api\servicesInterfaces\ServiceIndisponibiliteInterface;
 use toubilib\core\domain\exceptions\IndisponibiliteConflictException;
 use toubilib\infra\adapters\ApiResponseBuilder;
 
 final class CreateIndisponibiliteAction
 {
     public function __construct(
-        private ServiceIndisponibilite $serviceIndisponibilite
+        private ServiceIndisponibiliteInterface $serviceIndisponibilite
     ) {
     }
 

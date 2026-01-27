@@ -3,18 +3,18 @@
 use toubilib\core\application\ports\api\servicesInterfaces\ServicePraticienInterface;
 use toubilib\core\application\ports\api\servicesInterfaces\ServiceRdvInterface;
 use toubilib\core\application\ports\spi\adapterInterface\MonologLoggerInterface;
+use toubilib\core\application\ports\spi\repositoryInterfaces\IndisponibiliteRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PraticienRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
-use toubilib\core\application\ports\spi\repositoryInterfaces\IndisponibiliteRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\PatientRepositoryInterface;
 use toubilib\core\application\usecases\AuthzService;
 use toubilib\core\application\usecases\ServicePraticien;
 use toubilib\core\application\usecases\ServiceRdv;
 use toubilib\infra\repositories\PDORdvRepository;
-use toubilib\infra\repositories\PDOIndisponibiliteRepository;
 use toubilib\infra\adapters\MonologLogger;
 use toubilib\infra\adapters\AuthHeaderProvider;
 use toubilib\infra\adapters\AmqpEventPublisher;
+use toubilib\infra\adapters\HttpIndisponibiliteRepository;
 use toubilib\infra\adapters\HttpPraticienRepository;
 use toubilib\infra\adapters\HttpPatientRepository;
 
@@ -47,6 +47,7 @@ return [
             $c->get(RdvRepositoryInterface::class),
             $c->get(PraticienRepositoryInterface::class),
             $c->get(PatientRepositoryInterface::class),
+            $c->get(IndisponibiliteRepositoryInterface::class),
             $c->get(AmqpEventPublisher::class),
             $c->get(MonologLoggerInterface::class)
         );
@@ -71,8 +72,9 @@ return [
     },
 
     IndisponibiliteRepositoryInterface::class => static function ($c) {
-        return new PDOIndisponibiliteRepository(
-            $c->get('db.praticien')
+        return new HttpIndisponibiliteRepository(
+            $c->get('client.praticiens'),
+            $c->get(AuthHeaderProvider::class)
         );
     },
 

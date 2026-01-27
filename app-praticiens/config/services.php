@@ -7,8 +7,8 @@ use toubilib\core\application\ports\spi\repositoryInterfaces\PraticienRepository
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\IndisponibiliteRepositoryInterface;
 use toubilib\core\application\usecases\AuthzService;
+use toubilib\core\application\ports\api\servicesInterfaces\ServiceIndisponibiliteInterface;
 use toubilib\core\application\usecases\ServicePraticien;
-use toubilib\core\application\usecases\ServiceRdv;
 use toubilib\core\application\usecases\ServiceIndisponibilite;
 use toubilib\infra\adapters\AuthHeaderProvider;
 use toubilib\infra\adapters\HttpRdvRepository;
@@ -17,7 +17,7 @@ use toubilib\infra\repositories\PDOIndisponibiliteRepository;
 use toubilib\infra\adapters\MonologLogger;
 
 return [
-    // --- Services ---
+        // --- Services ---
     MonologLoggerInterface::class => static function ($c) {
         return new MonologLogger($c);
     },
@@ -33,26 +33,18 @@ return [
         );
     },
 
-    ServiceRdvInterface::class => static function ($c) {
-        return new ServiceRdv(
-            $c->get(RdvRepositoryInterface::class),
-            $c->get(PraticienRepositoryInterface::class),
-            $c->get(MonologLoggerInterface::class)
-        );
-    },
-
     AuthzService::class => static function ($c) {
         return new AuthzService($c->get(RdvRepositoryInterface::class), $c->get(MonologLoggerInterface::class));
     },
 
-    ServiceIndisponibilite::class => static function ($c) {
+    ServiceIndisponibiliteInterface::class => static function ($c) {
         return new ServiceIndisponibilite(
             $c->get(IndisponibiliteRepositoryInterface::class),
             $c->get(RdvRepositoryInterface::class)
         );
     },
 
-    // --- Repositories ---
+        // --- Repositories ---
     PraticienRepositoryInterface::class => static function ($c) {
         return new PDOPraticienRepository(
             $c->get('db.praticien')

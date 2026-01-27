@@ -5,13 +5,14 @@ namespace toubilib\core\application\usecases;
 use DateTimeImmutable;
 use toubilib\core\application\ports\api\dtos\inputs\InputIndisponibiliteDTO;
 use toubilib\core\application\ports\api\dtos\outputs\IndisponibiliteDTO;
+use toubilib\core\application\ports\api\servicesInterfaces\ServiceIndisponibiliteInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\IndisponibiliteRepositoryInterface;
 use toubilib\core\application\ports\spi\repositoryInterfaces\RdvRepositoryInterface;
 use toubilib\core\domain\entities\Indisponibilite;
 use toubilib\core\domain\exceptions\IndisponibiliteConflictException;
 use toubilib\core\domain\exceptions\IndisponibiliteNotFoundException;
 
-final class ServiceIndisponibilite
+final class ServiceIndisponibilite implements ServiceIndisponibiliteInterface
 {
     public function __construct(
         private IndisponibiliteRepositoryInterface $indisponibiliteRepository,

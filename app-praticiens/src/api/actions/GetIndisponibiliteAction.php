@@ -4,13 +4,14 @@ namespace toubilib\api\actions;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use toubilib\core\application\usecases\ServiceIndisponibilite;
+use toubilib\core\application\ports\api\servicesInterfaces\ServiceIndisponibiliteInterface;
+use toubilib\core\domain\entities\Roles;
 use toubilib\infra\adapters\ApiResponseBuilder;
 
 final class GetIndisponibiliteAction
 {
     public function __construct(
-        private ServiceIndisponibilite $serviceIndisponibilite
+        private ServiceIndisponibiliteInterface $serviceIndisponibilite
     ) {
     }
 
@@ -42,6 +43,10 @@ final class GetIndisponibiliteAction
         }
 
         $attributes = $indispo->jsonSerialize();
+        $auth = $request->getAttribute('authenticated_user');
+        if ($auth !== null && $auth->role !== Roles::PRATICIEN) {
+            $attributes['motif'] = null;
+        }
         $base = "/api/praticiens/{$praticienId}/indisponibilites/{$indispoId}";
         $links = [
             'self' => ['href' => $base],

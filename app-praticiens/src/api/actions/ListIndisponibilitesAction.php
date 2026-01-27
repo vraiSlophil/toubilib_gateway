@@ -4,15 +4,15 @@ namespace toubilib\api\actions;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use toubilib\core\application\usecases\ServiceIndisponibilite;
+use toubilib\core\application\ports\api\servicesInterfaces\ServiceIndisponibiliteInterface;
+use toubilib\core\domain\entities\Roles;
 use toubilib\infra\adapters\ApiResponseBuilder;
 
 final class ListIndisponibilitesAction
 {
     public function __construct(
-        private ServiceIndisponibilite $serviceIndisponibilite
-    )
-    {
+        private ServiceIndisponibiliteInterface $serviceIndisponibilite
+    ) {
     }
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
@@ -23,7 +23,7 @@ final class ListIndisponibilitesAction
             $indisponibilites = $this->serviceIndisponibilite->listForPraticien($praticienId);
             $items = array_map(static function ($dto) use ($praticienId) {
                 $attributes = $dto->jsonSerialize();
-                $id = (string)($attributes['id'] ?? '');
+                $id = (string) ($attributes['id'] ?? '');
                 unset($attributes['id']);
                 $base = "/api/praticiens/{$praticienId}/indisponibilites/{$id}";
                 $links = [
@@ -33,6 +33,18 @@ final class ListIndisponibilitesAction
                 ];
                 return ApiResponseBuilder::resource('indisponibilites', $id, $attributes, $links);
             }, $indisponibilites);
+
+            $auth = $request->getAttribute('authenticated_user');
+            if ($auth !== null && $auth->role !== Roles::PRATICIEN) {
+                $items = array_map(static function (array $resource) {
+                    $attributes = $resource['attributes'] ?? null;
+                    if (is_array($attributes)) {
+                        $attributes['motif'] = null;
+                        $resource['attributes'] = $attributes;
+                    }
+                    return $resource;
+                }, $items);
+            }
 
             return ApiResponseBuilder::create()
                 ->status(200)

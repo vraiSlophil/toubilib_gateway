@@ -13,6 +13,7 @@ interface AuthzServiceInterface
     public function canCreatePraticien(ProfileDTO $user): bool;
     public function canListUserRdvs(ProfileDTO $user): bool;
     public function canEditRdv(ProfileDTO $user, string $rdvId): bool;
+    public function canViewIndisponibilites(ProfileDTO $user, string $praticienId): bool;
     public function canManageIndisponibilites(ProfileDTO $user, string $praticienId): bool;
 
 }

@@ -42,7 +42,7 @@ return function (App $app): App {
                 $app->get('/indisponibilites', ListIndisponibilitesAction::class)
                     ->add(new AuthzMiddleware(
                         $app->getContainer()->get(AuthzService::class),
-                        'manageIndisponibilites',
+                        'viewIndisponibilites',
                         null,
                         $app->getContainer()->get(AuthHeaderProvider::class)
                     ));
@@ -56,7 +56,7 @@ return function (App $app): App {
                 $app->get('/indisponibilites/{indispoId}', GetIndisponibiliteAction::class)
                     ->add(new AuthzMiddleware(
                         $app->getContainer()->get(AuthzService::class),
-                        'manageIndisponibilites',
+                        'viewIndisponibilites',
                         null,
                         $app->getContainer()->get(AuthHeaderProvider::class)
                     ));
