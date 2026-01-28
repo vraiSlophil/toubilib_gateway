@@ -26,6 +26,7 @@ composer.lock
 
 /docs/*
 !/docs/ROUTES.md
+!/docs/Toubilib-documentation.html
 arbo.txt
 
 /rabbitmq.toubi/
